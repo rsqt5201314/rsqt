@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>图床 · 手机版</title>
+    <style>
+        :root {
+            --primary-1: #7c3aed;
+            --primary-2: #4f46e5;
+            --primary-3: #8b5cf6;
+            --bg: #f5f6fa;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --radius: 14px;
+            --radius-sm: 10px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            overscroll-behavior-y: contain;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* ========== 顶部标题 ========== */
+        .header {
+            background: linear-gradient(135deg, var(--primary-1) 0%, var(--primary-2) 100%);
+            padding: 20px 16px 18px;
+            padding-top: calc(20px + env(safe-area-inset-top));
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
+        }
+        .header h1 {
+            color: #fff;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .header p {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.72rem;
+            margin-top: 3px;
+        }
+
+        .container {
+            padding: 12px 12px 100px;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ========== Token 区域 ========== */
+        .token-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            background: #f8fafc;
+            border: 1.5px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.82rem;
+            color: var(--text-light);
+        }
+        .token-status.active {
+            background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: var(--success);
+        }
+        .token-status .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            flex-shrink: 0;
+        }
+        .token-status.active .dot {
+            background: var(--success);
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+        }
+        .token-status .arrow {
+            margin-left: auto;
+            font-size: 0.8rem;
+            opacity: 0.5;
+        }
+        .token-panel {
+            display: none;
+            margin-top: 10px;
+            gap: 8px;
+            flex-direction: column;
+        }
+        .token-panel.show {
+            display: flex;
+        }
+        .token-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            outline: none;
+            transition: var(--transition);
+            background: #fafbfc;
+            font-family: monospace;
+        }
+        .token-input:focus {
+            border-color: var(--primary-3);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+        .token-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn {
+            padding: 11px 18px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            white-space: nowrap;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-1), var(--primary-2));
+            color: #fff;
+            flex: 1;
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--text-light);
+            border: 1.5px solid var(--border);
+        }
+        .btn-sm {
+            padding: 7px 12px;
+            font-size: 0.72rem;
+            border-radius: 8px;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .btn-copy {
+            background: #f1f5f9;
+            color: var(--text);
+            border: 1.5px solid var(--border);
+        }
+        .btn-open {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1.5px solid #bfdbfe;
+        }
+        .btn-delete {
+            background: #fef2f2;
+            color: var(--danger);
+            border: 1.5px solid #fecaca;
+        }
+
+        /* ========== 上传区 ========== */
+        .upload-btn-wrap {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .upload-trigger {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 18px 16px;
+            border-radius: var(--radius);
+            background: linear-gradient(135deg, var(--primary-1), var(--primary-2));
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+            transition: var(--transition);
+            user-select: none;
+        }
+        .upload-trigger:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
+        }
+        .upload-trigger .big-icon {
+            font-size: 1.4rem;
+        }
+
+        .upload-trigger.camera {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+            flex: 0 0 auto;
+            padding: 18px 20px;
+        }
+
+        /* 提取音频选项 */
+        .extract-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 14px;
+            background: #f8fafc;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            user-select: none;
+            margin-bottom: 10px;
+        }
+        .extract-toggle.active {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(79, 70, 229, 0.06));
+            border-color: rgba(124, 58, 237, 0.4);
+        }
+        .extract-toggle .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #c4b5fd;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: var(--transition);
+            background: #fff;
+        }
+        .extract-toggle.active .checkbox {
+            background: linear-gradient(135deg, var(--primary-1), var(--primary-2));
+            border-color: var(--primary-1);
+        }
+        .extract-toggle .checkbox::after {
+            content: '✓';
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: var(--transition);
+        }
+        .extract-toggle.active .checkbox::after {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .extract-toggle .label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            flex: 1;
+        }
+        .extract-toggle .label small {
+            display: block;
+            font-size: 0.68rem;
+            color: var(--text-light);
+            font-weight: 400;
+            margin-top: 2px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* ========== 上传队列 ========== */
+        .queue-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .queue-header .title {
+            font-size: 0.82rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .queue-header .badge {
+            background: var(--primary-1);
+            color: #fff;
+            font-size: 0.65rem;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+        .queue-header .badge.done {
+            background: var(--success);
+        }
+        .queue-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .queue-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 45vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .queue-list::-webkit-scrollbar {
+            width: 3px;
+        }
+        .queue-list::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+
+        .queue-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: #f8fafc;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--border);
+            animation: slideIn 0.25s ease-out;
+            transition: var(--transition);
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .queue-item.success {
+            background: rgba(16, 185, 129, 0.06);
+            border-color: rgba(16, 185, 129, 0.25);
+        }
+        .queue-item.error {
+            background: rgba(239, 68, 68, 0.06);
+            border-color: rgba(239, 68, 68, 0.25);
+        }
+        .queue-item.uploading {
+            background: rgba(124, 58, 237, 0.05);
+            border-color: rgba(124, 58, 237, 0.3);
+        }
+
+        .queue-item .icon-box {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .queue-item .icon-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .queue-item .info {
+            flex: 1;
+            min-width: 0;
+        }
+        .queue-item .filename {
+            font-size: 0.78rem;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+        }
+        .queue-item .meta {
+            font-size: 0.65rem;
+            color: var(--text-light);
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .queue-item .meta .status {
+            font-weight: 600;
+        }
+        .queue-item .meta .status.waiting { color: var(--text-light); }
+        .queue-item .meta .status.uploading { color: var(--primary-1); }
+        .queue-item .meta .status.success { color: var(--success); }
+        .queue-item .meta .status.error { color: var(--danger); }
+        .queue-item .meta .status.extracting { color: var(--warning); }
+
+        .progress-mini {
+            width: 100%;
+            height: 3px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .progress-mini .fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 2px;
+            background: linear-gradient(90deg, var(--primary-1), var(--primary-3));
+            transition: width 0.2s ease;
+        }
+        .progress-mini .fill.success {
+            background: var(--success);
+        }
+        .progress-mini .fill.error {
+            background: var(--danger);
+        }
+        .progress-mini .fill.extracting {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+            animation: extractingPulse 1.2s ease-in-out infinite;
+        }
+        @keyframes extractingPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .queue-item .remove-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            color: #cbd5e1;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+        .queue-item .remove-btn:active {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* ========== 图库 ========== */
+        .gallery-toolbar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 2px;
+            scrollbar-width: none;
+        }
+        .gallery-toolbar::-webkit-scrollbar {
+            display: none;
+        }
+        .filter-btn {
+            padding: 6px 13px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 500;
+            border: 1.5px solid var(--border);
+            background: #fff;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-light);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .filter-btn.active {
+            background: var(--primary-1);
+            color: #fff;
+            border-color: var(--primary-1);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        @media (min-width: 480px) {
+            .gallery-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .gallery-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+        .gallery-card .thumb {
+            width: 100%;
+            aspect-ratio: 1;
+            background: #0f0f1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .gallery-card .thumb img,
+        .gallery-card .thumb video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .gallery-card .thumb .badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            color: #fff;
+            font-size: 0.55rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 8px;
+            letter-spacing: 0.3px;
+        }
+        .gallery-card .thumb .time-badge {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: rgba(124, 58, 237, 0.85);
+            backdrop-filter: blur(4px);
+            color: #fff;
+            font-size: 0.55rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+        .gallery-card .thumb .play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.8rem;
+            color: rgba(255, 255, 255, 0.9);
+            pointer-events: none;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+        }
+        .gallery-card .thumb .audio-ph {
+            font-size: 2rem;
+            color: #a0aec0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .gallery-card .thumb .audio-ph span {
+            font-size: 0.6rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .gallery-card .body {
+            padding: 8px 10px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .gallery-card .name {
+            font-size: 0.72rem;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .gallery-card .size {
+            font-size: 0.62rem;
+            color: var(--text-light);
+        }
+        .gallery-card .actions {
+            display: flex;
+            gap: 4px;
+        }
+        .gallery-card .actions .btn {
+            flex: 1;
+            font-size: 0.62rem;
+            padding: 6px 4px;
+            border-radius: 6px;
+            min-width: 0;
+        }
+        .gallery-card audio {
+            width: 100%;
+            height: 32px;
+            border-radius: 6px;
+        }
+
+        /* ========== 空状态 ========== */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+        .empty-state .icon {
+            font-size: 3rem;
+            opacity: 0.4;
+            margin-bottom: 8px;
+        }
+        .empty-state .text {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .empty-state .hint {
+            font-size: 0.72rem;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .loading-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 30px;
+            color: var(--text-light);
+            font-size: 0.82rem;
+        }
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2.5px solid #e2e8f0;
+            border-top-color: var(--primary-1);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========== Toast ========== */
+        .toast-container {
+            position: fixed;
+            top: calc(16px + env(safe-area-inset-top));
+            left: 12px;
+            right: 12px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .toast {
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            color: #fff;
+            font-size: 0.82rem;
+            font-weight: 500;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            animation: toastIn 0.3s ease-out;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            line-height: 1.4;
+        }
+        .toast.success { background: rgba(16, 185, 129, 0.95); }
+        .toast.error { background: rgba(239, 68, 68, 0.95); }
+        .toast.warning { background: rgba(245, 158, 11, 0.95); }
+        .toast.info { background: rgba(79, 70, 229, 0.95); }
+        .toast.out {
+            animation: toastOut 0.25s ease-in forwards;
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+
+        /* ========== 底部浮动栏 ========== */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border);
+            padding: 8px 12px;
+            padding-bottom: calc(8px + env(safe-area-inset-bottom));
+            display: flex;
+            gap: 8px;
+            z-index: 90;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+        .bottom-bar .btn {
+            flex: 1;
+            font-size: 0.8rem;
+            padding: 11px;
+        }
+
+        /* 时间分组 */
+        .time-group {
+            grid-column: 1 / -1;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-light);
+            padding: 6px 2px 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+        }
+        .time-group::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--border), transparent);
+        }
+        .time-group .count {
+            font-size: 0.62rem;
+            background: #eef2f7;
+            padding: 1px 7px;
+            border-radius: 8px;
+            color: var(--text-light);
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>📦 图床管理</h1>
+        <p>图片 · 音频 · 视频 · 手机批量上传</p>
+    </header>
+
+    <div class="container">
+
+        <!-- Token -->
+        <div class="card">
+            <div class="card-title">🔑 GitHub Token</div>
+            <div class="token-status" id="tokenStatus" onclick="toggleTokenPanel()">
+                <span class="dot" id="tokenDot"></span>
+                <span id="tokenStatusText">点击设置 Token</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="token-panel" id="tokenPanel">
+                <input type="password" id="tokenInput" class="token-input" placeholder="粘贴 Token（需 repo 权限）" autocomplete="off">
+                <div class="token-actions">
+                    <button class="btn btn-primary" onclick="saveToken()">💾 保存</button>
+                    <button class="btn btn-outline" onclick="clearToken()">清除</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 上传 -->
+        <div class="card">
+            <div class="card-title">📤 上传文件 <span style="font-size:0.7rem;color:var(--text-light);font-weight:400;margin-left:4px;">（一次可选多个）</span></div>
+
+            <div class="upload-btn-wrap">
+                <div class="upload-trigger" onclick="document.getElementById('fileInput').click()">
+                    <span class="big-icon">📁</span>
+                    <span>选择文件</span>
+                </div>
+                <div class="upload-trigger camera" onclick="document.getElementById('cameraInput').click()">
+                    <span class="big-icon">📷</span>
+                </div>
+            </div>
+
+            <div class="extract-toggle" id="extractToggle" onclick="toggleExtract()">
+                <div class="checkbox"></div>
+                <div class="label">
+                    🎵 视频自动提取音频
+                    <small>视频上传时同步生成 WAV 音频</small>
+                </div>
+            </div>
+
+            <input type="file" id="fileInput" accept="image/*,audio/*,video/*" multiple>
+            <input type="file" id="cameraInput" accept="image/*,video/*" capture="environment" multiple>
+
+            <!-- 队列 -->
+            <div id="queueContainer" style="display:none;">
+                <div class="queue-header">
+                    <div class="title">
+                        📋 上传队列
+                        <span class="badge" id="queueBadge">0</span>
+                    </div>
+                    <div class="queue-actions">
+                        <button class="btn btn-outline btn-sm" onclick="clearFinished()">清除完成</button>
+                    </div>
+                </div>
+                <div class="queue-list" id="queueList"></div>
+            </div>
+        </div>
+
+        <!-- 图库 -->
+        <div class="card">
+            <div class="card-title">🗂️ 图库 <span id="galleryCount" style="font-size:0.7rem;color:var(--text-light);font-weight:400;margin-left:auto;">0 个文件</span></div>
+            <div class="gallery-toolbar">
+                <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">全部</button>
+                <button class="filter-btn" data-filter="image" onclick="setFilter('image')">🖼️ 图片</button>
+                <button class="filter-btn" data-filter="audio" onclick="setFilter('audio')">🎵 音频</button>
+                <button class="filter-btn" data-filter="video" onclick="setFilter('video')">🎬 视频</button>
+            </div>
+            <div id="galleryContainer">
+                <div class="loading-box">
+                    <span class="spinner"></span>
+                    <span>加载中...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部栏 -->
+    <div class="bottom-bar">
+        <button class="btn btn-outline" onclick="loadGallery()">🔄 刷新图库</button>
+        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📤 上传新文件</button>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ============================================================
+        // 配置
+        // ============================================================
+        const CONFIG = {
+            GITHUB_USERNAME: 'rsqt5201314',
+            REPO_NAME: 'rsqt',
+            BRANCH: 'main',
+            get BASE_URL() { return `https://${this.GITHUB_USERNAME}.github.io/${this.REPO_NAME}/`; },
+            get API_BASE() { return `https://api.github.com/repos/${this.GITHUB_USERNAME}/${this.REPO_NAME}/contents/`; },
+            IMAGE_EXT: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'],
+            AUDIO_EXT: ['mp3', 'wav', 'm4a', 'ogg', 'flac', 'aac'],
+            VIDEO_EXT: ['mp4', 'webm', 'mov', 'm4v', 'avi', 'mkv'],
+            MAX_SIZE: 100 * 1024 * 1024,
+            MAX_FILES: 100,
+        };
+
+        let token = localStorage.getItem('gh_token') || '';
+        let galleryFiles = [];
+        let currentFilter = 'all';
+        let extractAudioEnabled = false;
+
+        // 上传任务队列
+        let uploadQueue = [];
+        let isProcessing = false;
+        let queueIdCounter = 0;
+
+        // ============================================================
+        // 工具函数
+        // ============================================================
+        function getExt(name) {
+            const p = name.split('.');
+            return p.length > 1 ? p.pop().toLowerCase() : '';
+        }
+        function isImage(n) { return CONFIG.IMAGE_EXT.includes(getExt(n)); }
+        function isAudio(n) { return CONFIG.AUDIO_EXT.includes(getExt(n)); }
+        function isVideo(n) { return CONFIG.VIDEO_EXT.includes(getExt(n)); }
+        function isSupported(n) { return isImage(n) || isAudio(n) || isVideo(n); }
+        function getType(n) {
+            if (isImage(n)) return 'image';
+            if (isAudio(n)) return 'audio';
+            if (isVideo(n)) return 'video';
+            return 'other';
+        }
+
+        function encodePath(f) { return encodeURIComponent(f).replace(/%2F/g, '%2F'); }
+        function getExternalUrl(f) { return CONFIG.BASE_URL + encodePath(f); }
+        function getApiUrl(f) { return CONFIG.API_BASE + encodePath(f); }
+
+        function fmtSize(b) {
+            if (b < 1024) return b + ' B';
+            if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+            if (b < 1073741824) return (b / 1048576).toFixed(2) + ' MB';
+            return (b / 1073741824).toFixed(2) + ' GB';
+        }
+
+        function escapeHtml(s) {
+            const d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
+
+        function generateTimestamp() {
+            const n = new Date();
+            return `${n.getFullYear()}${String(n.getMonth()+1).padStart(2,'0')}${String(n.getDate()).padStart(2,'0')}_${String(n.getHours()).padStart(2,'0')}${String(n.getMinutes()).padStart(2,'0')}${String(n.getSeconds()).padStart(2,'0')}`;
+        }
+
+        function addTimestamp(name, customExt) {
+            const ts = generateTimestamp();
+            const ext = customExt || getExt(name);
+            const base = name.substring(0, name.lastIndexOf('.')) || name;
+            const clean = base.replace(/[^\w\u4e00-\u9fa5\-]/g, '_').substring(0, 40);
+            return `${ts}_${clean}.${ext}`;
+        }
+
+        function extractTimestamp(name) {
+            const m = name.match(/^(\d{8})_(\d{6})_/);
+            if (!m) return null;
+            return new Date(
+                parseInt(m[1].substring(0,4)),
+                parseInt(m[1].substring(4,6)) - 1,
+                parseInt(m[1].substring(6,8)),
+                parseInt(m[2].substring(0,2)),
+                parseInt(m[2].substring(2,4)),
+                parseInt(m[2].substring(4,6))
+            );
+        }
+
+        function getDisplayName(name) {
+            const m = name.match(/^\d{8}_\d{6}_(.+)$/);
+            return m ? m[1] : name;
+        }
+
+        function getGroupLabel(date) {
+            if (!date) return '未知时间';
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const yest = new Date(today); yest.setDate(yest.getDate() - 1);
+            const fd = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            if (fd.getTime() === today.getTime()) return '今天';
+            if (fd.getTime() === yest.getTime()) return '昨天';
+            if (date.getFullYear() === now.getFullYear()) return `${date.getMonth()+1}月${date.getDate()}日`;
+            return `${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日`;
+        }
+
+        function fmtTime(date) {
+            if (!date) return '';
+            return `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+        }
+
+        function fmtFullTime(date) {
+            if (!date) return '';
+            return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+        }
+
+        // ============================================================
+        // Toast
+        // ============================================================
+        function showToast(msg, type = 'info', duration = 2500) {
+            const c = document.getElementById('toastContainer');
+            const icons = { success: '✅', error: '❌', warning: '⚠️', info: '💡' };
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            t.innerHTML = `<span>${icons[type] || icons.info}</span><span>${escapeHtml(msg)}</span>`;
+            c.appendChild(t);
+            setTimeout(() => {
+                t.classList.add('out');
+                setTimeout(() => t.remove(), 250);
+            }, duration);
+        }
+
+        // ============================================================
+        // Token 管理
+        // ============================================================
+        function toggleTokenPanel() {
+            document.getElementById('tokenPanel').classList.toggle('show');
+        }
+
+        function saveToken() {
+            const input = document.getElementById('tokenInput');
+            const v = input.value.trim();
+            if (!v) { showToast('请输入 Token', 'warning'); return; }
+            token = v;
+            localStorage.setItem('gh_token', token);
+            input.value = '';
+            updateTokenStatus();
+            document.getElementById('tokenPanel').classList.remove('show');
+            showToast('Token 已保存', 'success');
+            loadGallery();
+        }
+
+        function clearToken() {
+            if (!confirm('确定清除 Token？')) return;
+            token = '';
+            localStorage.removeItem('gh_token');
+            document.getElementById('tokenInput').value = '';
+            updateTokenStatus();
+            galleryFiles = [];
+            renderGallery();
+            showToast('已清除', 'info');
+        }
+
+        function updateTokenStatus() {
+            const el = document.getElementById('tokenStatus');
+            const dot = document.getElementById('tokenDot');
+            const txt = document.getElementById('tokenStatusText');
+            if (token) {
+                el.classList.add('active');
+                txt.textContent = 'Token 已设置 ✓';
+            } else {
+                el.classList.remove('active');
+                txt.textContent = '点击设置 Token';
+            }
+        }
+
+        // ============================================================
+        // 提取音频开关
+        // ============================================================
+        function toggleExtract() {
+            extractAudioEnabled = !extractAudioEnabled;
+            document.getElementById('extractToggle').classList.toggle('active', extractAudioEnabled);
+            showToast(extractAudioEnabled ? '已开启视频提取音频' : '已关闭', extractAudioEnabled ? 'success' : 'info', 1500);
+        }
+
+        // ============================================================
+        // GitHub API
+        // ============================================================
+        function headers() {
+            return {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28',
+            };
+        }
+
+        async function fetchGallery() {
+            if (!token) throw new Error('未设置 Token');
+            const resp = await fetch(`${CONFIG.API_BASE}?per_page=100`, { headers: headers() });
+            if (!resp.ok) {
+                let m = `HTTP ${resp.status}`;
+                try { const d = await resp.json(); if (d.message) m += `: ${d.message}`; } catch(e){}
+                if (resp.status === 401) m = 'Token 无效';
+                if (resp.status === 404) m = '仓库不存在';
+                throw new Error(m);
+            }
+            const data = await resp.json();
+            return data.filter(x => x.type === 'file' && isSupported(x.name))
+                .map(x => ({
+                    name: x.name,
+                    sha: x.sha,
+                    size: x.size || 0,
+                    timestamp: extractTimestamp(x.name),
+                    displayName: getDisplayName(x.name)
+                }));
+        }
+
+        function uploadToGitHub(file, filename, sha = null, onProgress) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64 = e.target.result.split(',')[1];
+                    const body = {
+                        message: `Upload ${filename}`,
+                        content: base64,
+                        branch: CONFIG.BRANCH,
+                    };
+                    if (sha) {
+                        body.sha = sha;
+                        body.message = `Update ${filename}`;
+                    }
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('PUT', getApiUrl(filename), true);
+                    xhr.setRequestHeader('Authorization', `token ${token}`);
+                    xhr.setRequestHeader('Accept', 'application/vnd.github+json');
+                    xhr.setRequestHeader('X-GitHub-Api-Version', '2022-11-28');
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+
+                    xhr.upload.onprogress = function(ev) {
+                        if (ev.lengthComputable && onProgress) {
+                            onProgress(Math.round((ev.loaded / ev.total) * 100));
+                        }
+                    };
+                    xhr.onload = function() {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            resolve(JSON.parse(xhr.responseText));
+                        } else {
+                            let m = `HTTP ${xhr.status}`;
+                            try {
+                                const d = JSON.parse(xhr.responseText);
+                                if (d.message) m += `: ${d.message}`;
+                                if (xhr.status === 422) m = '文件已存在';
+                                if (xhr.status === 413) m = '文件太大（>100MB）';
+                            } catch(e){}
+                            reject(new Error(m));
+                        }
+                    };
+                    xhr.onerror = () => reject(new Error('网络错误'));
+                    xhr.send(JSON.stringify(body));
+                };
+                reader.onerror = () => reject(new Error('读取失败'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function deleteFromGitHub(filename, sha) {
+            if (!token) throw new Error('未设置 Token');
+            const resp = await fetch(getApiUrl(filename), {
+                method: 'DELETE',
+                headers: headers(),
+                body: JSON.stringify({ message: `Delete ${filename}`, sha, branch: CONFIG.BRANCH }),
+            });
+            if (!resp.ok) {
+                let m = `HTTP ${resp.status}`;
+                try { const d = await resp.json(); if (d.message) m += `: ${d.message}`; } catch(e){}
+                throw new Error(m);
+            }
+            return true;
+        }
+
+        // ============================================================
+        // 音频提取
+        // ============================================================
+        function audioBufferToWav(audioBuffer) {
+            const numCh = audioBuffer.numberOfChannels;
+            const sampleRate = audioBuffer.sampleRate;
+            const bitDepth = 16;
+            const bytesPerSample = bitDepth / 8;
+            const blockAlign = numCh * bytesPerSample;
+            const length = audioBuffer.length;
+            const dataSize = length * blockAlign;
+            const bufferSize = 44 + dataSize;
+            const buffer = new ArrayBuffer(bufferSize);
+            const view = new DataView(buffer);
+
+            function writeStr(offset, str) {
+                for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+            }
+            writeStr(0, 'RIFF');
+            view.setUint32(4, 36 + dataSize, true);
+            writeStr(8, 'WAVE');
+            writeStr(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numCh, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * blockAlign, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, bitDepth, true);
+            writeStr(36, 'data');
+            view.setUint32(40, dataSize, true);
+
+            const channels = [];
+            for (let i = 0; i < numCh; i++) channels.push(audioBuffer.getChannelData(i));
+
+            let offset = 44;
+            for (let i = 0; i < length; i++) {
+                for (let ch = 0; ch < numCh; ch++) {
+                    let s = Math.max(-1, Math.min(1, channels[ch][i]));
+                    s = s < 0 ? s * 0x8000 : s * 0x7FFF;
+                    view.setInt16(offset, s, true);
+                    offset += 2;
+                }
+            }
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        async function extractAudio(videoFile) {
+            const ab = await videoFile.arrayBuffer();
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) throw new Error('浏览器不支持');
+            const ctx = new Ctx();
+            return new Promise((resolve, reject) => {
+                ctx.decodeAudioData(ab,
+                    (buf) => {
+                        try {
+                            const wav = audioBufferToWav(buf);
+                            ctx.close();
+                            resolve(wav);
+                        } catch(e) {
+                            ctx.close();
+                            reject(new Error('编码失败'));
+                        }
+                    },
+                    () => { ctx.close(); reject(new Error('该视频无音频或格式不支持')); }
+                );
+            });
+        }
+
+        // ============================================================
+        // 上传队列 UI
+        // ============================================================
+        function updateQueueBadge() {
+            const badge = document.getElementById('queueBadge');
+            const total = uploadQueue.length;
+            const done = uploadQueue.filter(x => x.status === 'success').length;
+            if (total === 0) {
+                document.getElementById('queueContainer').style.display = 'none';
+            } else {
+                document.getElementById('queueContainer').style.display = 'block';
+            }
+            badge.textContent = done > 0 ? `${done}/${total}` : total;
+            badge.className = 'badge' + (done === total && total > 0 ? ' done' : '');
+        }
+
+        function renderQueue() {
+            const list = document.getElementById('queueList');
+            let html = '';
+            for (const item of uploadQueue) {
+                const icon = isVideo(item.filename) ? '🎬' : isImage(item.filename) ? '🖼️' : isAudio(item.filename) ? '🎵' : '📄';
+                const statusText = {
+                    'waiting': '等待中',
+                    'uploading': item.progress + '%',
+                    'extracting': '提取中',
+                    'success': '成功',
+                    'error': '失败'
+                }[item.status] || item.status;
+
+                const statusClass = item.status;
+                const progressClass = item.status === 'success' ? 'success' : item.status === 'error' ? 'error' : item.status === 'extracting' ? 'extracting' : '';
+
+                html += `
+                    <div class="queue-item ${item.status}" data-id="${item.id}">
+                        <div class="icon-box">${icon}</div>
+                        <div class="info">
+                            <span class="filename">${escapeHtml(getDisplayName(item.displayName || item.filename))}</span>
+                            <div class="meta">
+                                <span>${fmtSize(item.size)}</span>
+                                <span>·</span>
+                                <span class="status ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="progress-mini">
+                                <div class="fill ${progressClass}" style="width:${item.status === 'success' ? 100 : item.status === 'error' ? 100 : (item.status === 'extracting' ? 100 : item.progress)}%"></div>
+                            </div>
+                        </div>
+                        ${(item.status === 'waiting' || item.status === 'error') ? `<button class="remove-btn" onclick="removeQueueItem(${item.id})">×</button>` : ''}
+                    </div>
+                `;
+            }
+            list.innerHTML = html;
+            updateQueueBadge();
+        }
+
+        function updateQueueItem(id, updates) {
+            const idx = uploadQueue.findIndex(x => x.id === id);
+            if (idx >= 0) {
+                Object.assign(uploadQueue[idx], updates);
+                renderQueue();
+            }
+        }
+
+        function removeQueueItem(id) {
+            uploadQueue = uploadQueue.filter(x => x.id !== id);
+            renderQueue();
+        }
+
+        function clearFinished() {
+            uploadQueue = uploadQueue.filter(x => x.status === 'waiting' || x.status === 'uploading' || x.status === 'extracting');
+            renderQueue();
+        }
+
+        // ============================================================
+        // 处理上传队列（核心：串行处理，避免卡顿）
+        // ============================================================
+        async function processQueue() {
+            if (isProcessing) return;
+            isProcessing = true;
+
+            while (true) {
+                // 找到下一个待处理的任务
+                const nextTask = uploadQueue.find(x => x.status === 'waiting');
+                if (!nextTask) break;
+
+                const taskId = nextTask.id;
+
+                try {
+                    // 1. 视频提取音频
+                    if (taskId.toString().startsWith('ex_') || nextTask.isExtract) {
+                        updateQueueItem(taskId, { status: 'extracting' });
+                        await new Promise(r => setTimeout(r, 100));
+
+                        try {
+                            const wavBlob = await extractAudio(nextTask.file);
+                            const audioName = nextTask.filename.replace(/\.[^.]+$/, '.wav');
+                            const audioFile = new File([wavBlob], audioName, { type: 'audio/wav' });
+
+                            updateQueueItem(taskId, { status: 'uploading', progress: 0 });
+                            const existing = galleryFiles.find(x => x.name === audioName);
+                            await uploadToGitHub(audioFile, audioName, existing ? existing.sha : null, (p) => {
+                                updateQueueItem(taskId, { progress: p });
+                            });
+                            updateQueueItem(taskId, { status: 'success', progress: 100 });
+                            showToast('🎵 音频提取成功', 'success', 2000);
+                        } catch (err) {
+                            updateQueueItem(taskId, { status: 'error', error: err.message });
+                            showToast(`提取失败: ${err.message}`, 'error', 3000);
+                        }
+                    } else {
+                        // 2. 普通上传
+                        updateQueueItem(taskId, { status: 'uploading', progress: 0 });
+                        await new Promise(r => setTimeout(r, 50));
+
+                        // 检查是否已存在同名文件
+                        const existing = galleryFiles.find(x => x.name === nextTask.filename);
+
+                        await uploadToGitHub(nextTask.file, nextTask.filename, existing ? existing.sha : null, (p) => {
+                            updateQueueItem(taskId, { progress: p });
+                        });
+                        updateQueueItem(taskId, { status: 'success', progress: 100 });
+                    }
+                } catch (err) {
+                    updateQueueItem(taskId, { status: 'error', error: err.message });
+                    showToast(`${getDisplayName(nextTask.filename)}: ${err.message}`, 'error', 3000);
+                }
+
+                // 让浏览器有时间渲染 UI
+                await new Promise(r => setTimeout(r, 100));
+            }
+
+            isProcessing = false;
+
+            // 队列处理完成，刷新图库
+            const hasSuccess = uploadQueue.some(x => x.status === 'success');
+            if (hasSuccess) {
+                showToast('队列处理完成，正在刷新图库...', 'success', 2000);
+                await new Promise(r => setTimeout(r, 800));
+                await loadGallery();
+                // 清空已完成的
+                setTimeout(() => {
+                    uploadQueue = uploadQueue.filter(x => x.status !== 'success');
+                    renderQueue();
+                }, 2000);
+            }
+        }
+
+        // ============================================================
+        // 文件选择处理
+        // ============================================================
+        function handleFiles(fileList) {
+            if (!token) {
+                showToast('请先设置 Token', 'warning');
+                document.getElementById('tokenPanel').classList.add('show');
+                return;
+            }
+            if (!fileList || fileList.length === 0) return;
+
+            const files = Array.from(fileList);
+
+            if (files.length > CONFIG.MAX_FILES) {
+                showToast(`一次最多 ${CONFIG.MAX_FILES} 个文件`, 'error');
+                return;
+            }
+
+            const supported = [];
+            const unsupported = [];
+            const oversized = [];
+
+            for (const f of files) {
+                if (!isSupported(f.name)) {
+                    unsupported.push(f.name);
+                } else if (f.size > CONFIG.MAX_SIZE) {
+                    oversized.push(`${f.name}（${fmtSize(f.size)}）`);
+                } else {
+                    supported.push(f);
+                }
+            }
+
+            if (unsupported.length > 0) showToast(`不支持: ${unsupported.slice(0, 3).join(', ')}${unsupported.length > 3 ? '...' : ''}`, 'warning', 3000);
+            if (oversized.length > 0) showToast(`文件过大（>100MB）: ${oversized.slice(0, 2).join(', ')}`, 'error', 4000);
+            if (supported.length === 0) return;
+
+            // 加入队列
+            for (const file of supported) {
+                const newName = addTimestamp(file.name);
+                const newFile = new File([file], newName, { type: file.type });
+
+                // 普通上传任务
+                uploadQueue.push({
+                    id: ++queueIdCounter,
+                    file: newFile,
+                    filename: newName,
+                    displayName: getDisplayName(newName),
+                    size: file.size,
+                    status: 'waiting',
+                    progress: 0,
+                    isExtract: false,
+                });
+
+                // 视频且开启提取 → 添加提取任务
+                if (isVideo(file.name) && extractAudioEnabled) {
+                    uploadQueue.push({
+                        id: ++queueIdCounter,
+                        file: file,
+                        filename: newName,
+                        displayName: '🎵 ' + getDisplayName(newName).replace(/\.[^.]+$/, '.wav'),
+                        size: file.size,
+                        status: 'waiting',
+                        progress: 0,
+                        isExtract: true,
+                    });
+                }
+            }
+
+            renderQueue();
+            showToast(`已添加 ${supported.length} 个文件到队列`, 'success', 2000);
+
+            // 启动处理
+            processQueue();
+        }
+
+        // ============================================================
+        // 图库
+        // ============================================================
+        function setFilter(f) {
+            currentFilter = f;
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.filter === f);
+            });
+            renderGallery();
+        }
+
+        function renderGallery() {
+            const c = document.getElementById('galleryContainer');
+            const countEl = document.getElementById('galleryCount');
+
+            if (!token) {
+                c.innerHTML = `<div class="empty-state"><div class="icon">🔑</div><div class="text">请先设置 Token</div><div class="hint">点击上方设置后即可查看</div></div>`;
+                countEl.textContent = '0 个文件';
+                return;
+            }
+
+            let files = galleryFiles;
+            if (currentFilter !== 'all') {
+                files = files.filter(f => getType(f.name) === currentFilter);
+            }
+
+            files.sort((a, b) => {
+                if (a.timestamp && b.timestamp) return b.timestamp - a.timestamp;
+                if (a.timestamp) return -1;
+                if (b.timestamp) return 1;
+                return b.name.localeCompare(a.name);
+            });
+
+            countEl.textContent = `${files.length} 个文件`;
+
+            if (files.length === 0) {
+                c.innerHTML = `<div class="empty-state"><div class="icon">📂</div><div class="text">暂无文件</div><div class="hint">上传后会显示在这里</div></div>`;
+                return;
+            }
+
+            // 按日期分组
+            const groups = {};
+            for (const f of files) {
+                const label = getGroupLabel(f.timestamp);
+                if (!groups[label]) groups[label] = [];
+                groups[label].push(f);
+            }
+
+            const order = Object.keys(groups).sort((a, b) => {
+                const special = { '今天': 0, '昨天': 1, '未知时间': 999 };
+                const ao = special[a] !== undefined ? special[a] : 2;
+                const bo = special[b] !== undefined ? special[b] : 2;
+                return ao - bo;
+            });
+
+            let html = '<div class="gallery-grid">';
+            for (const label of order) {
+                const gf = groups[label];
+                html += `<div class="time-group">📅 ${escapeHtml(label)} <span class="count">${gf.length}个</span></div>`;
+                for (const f of gf) {
+                    html += renderCard(f);
+                }
+            }
+            html += '</div>';
+            c.innerHTML = html;
+        }
+
+        function renderCard(file) {
+            const ext = getExt(file.name);
+            const url = getExternalUrl(file.name);
+            const img = isImage(file.name);
+            const aud = isAudio(file.name);
+            const vid = isVideo(file.name);
+            const typeLabel = vid ? '视频' : img ? '图片' : '音频';
+            const typeIcon = vid ? '🎬' : img ? '🖼️' : '🎵';
+            const dn = file.displayName || getDisplayName(file.name);
+            const tb = file.timestamp ? fmtTime(file.timestamp) : '';
+
+            return `
+                <div class="gallery-card">
+                    <div class="thumb" onclick="openLink('${escapeHtml(file.name)}')">
+                        ${tb ? `<span class="time-badge">${tb}</span>` : ''}
+                        <span class="badge">${typeIcon} ${ext.toUpperCase()}</span>
+                        ${img ? `
+                            <img src="${escapeHtml(url)}" alt="" loading="lazy"
+                                 onerror="this.parentElement.innerHTML='<div class=\\'audio-ph\\'>🖼️<span>加载失败</span></div>';">
+                        ` : vid ? `
+                            <video preload="metadata" muted>
+                                <source src="${escapeHtml(url)}" type="video/${ext}">
+                            </video>
+                            <span class="play-icon">▶</span>
+                        ` : `
+                            <div class="audio-ph">🎵<span>${ext.toUpperCase()}</span></div>
+                        `}
+                    </div>
+                    <div class="body">
+                        <div class="name" title="${escapeHtml(file.name)}">${escapeHtml(dn)}</div>
+                        <div class="size">${fmtSize(file.size)}${file.timestamp ? ' · ' + fmtFullTime(file.timestamp) : ''}</div>
+                        ${aud ? `<audio controls preload="none" src="${escapeHtml(url)}"></audio>` : ''}
+                        <div class="actions">
+                            <button class="btn btn-copy" onclick="copyLink('${escapeHtml(file.name)}')">📋 复制</button>
+                            <button class="btn btn-delete" onclick="deleteFile('${escapeHtml(file.name)}')">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadGallery() {
+            const c = document.getElementById('galleryContainer');
+            if (!token) { renderGallery(); return; }
+            c.innerHTML = `<div class="loading-box"><span class="spinner"></span><span>加载中...</span></div>`;
+            try {
+                galleryFiles = await fetchGallery();
+                renderGallery();
+            } catch (err) {
+                c.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><div class="text">加载失败</div><div class="hint">${escapeHtml(err.message)}</div><button class="btn btn-outline" style="margin-top:12px;" onclick="loadGallery()">重试</button></div>`;
+                showToast(err.message, 'error');
+            }
+        }
+
+        // ============================================================
+        // 卡片操作
+        // ============================================================
+        function copyLink(filename) {
+            const url = getExternalUrl(filename);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showToast('链接已复制', 'success', 1500);
+                }).catch(() => fallbackCopy(url));
+            } else {
+                fallbackCopy(url);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showToast('链接已复制', 'success', 1500);
+            } catch(e) {
+                showToast('复制失败', 'error');
+            }
+            document.body.removeChild(ta);
+        }
+
+        function openLink(filename) {
+            window.open(getExternalUrl(filename), '_blank');
+        }
+
+        async function deleteFile(filename) {
+            if (!token) { showToast('请先设置 Token', 'warning'); return; }
+            const file = galleryFiles.find(f => f.name === filename);
+            if (!file) { showToast('文件不存在，请刷新', 'warning'); return; }
+            如果 (!确认(`确定删除 "${获取显示名称(文件名)}" 吗？`)) 返回;
+            尝试 {
+                等待 从GitHub中删除(文件名, 文件.sha);
+                showToast('已删除', 'success');
+                galleryFiles = galleryFiles.filter(f => f.name !== filename);
+                渲染图库();
+            } 捕获 (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        // ============================================================
+        // 初始化
+        // ============================================================
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            如果 (e.target.files && e.target.files.length > 0) {
+                handleFiles(e.target.files);
+                e.target.value = '';
+            }
+        });
+
+        document.getElementById('cameraInput').addEventListener('change', function(e) {
+            如果 (e.target.files && e.target.files.length > 0) {
+                handleFiles(e.target.files);
+                e.target.value = '';
+            }
+        });
+
+        document.getElementById('tokenInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); saveToken(); }
+        });
+
+        // 支持拖拽（桌面端）
+        document.addEventListener('dragover', e => e.preventDefault());
+        document.addEventListener('drop', e => {
+            e.preventDefault();
+            如果 (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                handleFiles(e.dataTransfer.files);
+            }
+        });
+
+        函数 初始化() {
+            更新令牌状态();
+            如果 (token) loadGallery();
+            否则 renderGallery();
+
+            // URL 参数 Token
+            const params = new URLSearchParams(window.location.search);
+            const t = params.get('token');
+            如果 (t) {
+                token = t;
+                localStorage.setItem('gh_token', token);
+                更新令牌状态();
+                showToast('Token 已从 URL 获取', 'success');
+                加载图库();
+            }
+        }
+
+        初始化();
+    </script>
+</body>
+</html>
