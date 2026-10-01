@@ -1,0 +1,2038 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>图床 · 视频转音频</title>
+    <style>
+        :root {
+            --primary-1: #7c3aed; --primary-2: #4f46e5; --primary-3: #8b5cf6;
+            --bg: #f5f6fa; --card-bg: #ffffff;
+            --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.18);
+            --radius: 16px; --radius-sm: 10px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-top: env(safe-area-inset-top, 0px);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        html, body {
+            height: 100%;
+            overscroll-behavior-y: contain;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--bg); color: var(--text); line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* ===== 顶栏 ===== */
+        .topbar {
+            position: sticky; top: 0; z-index: 100;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            padding: calc(12px + var(--safe-top)) 16px 12px;
+            color: #fff;
+            box-shadow: 0 2px 12px rgba(124, 58, 237, 0.3);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .topbar .logo {
+            font-size: 1.15rem; font-weight: 700;
+            display: flex; align-items: center; gap: 6px;
+            flex: 1;
+        }
+        .topbar .icon-btn {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff; font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: var(--transition);
+            flex-shrink: 0;
+        }
+        .topbar .icon-btn:active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0.92);
+        }
+
+        /* ===== 搜索 + 筛选 ===== */
+        .search-section {
+            padding: 12px 16px 8px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            position: sticky; top: calc(64px + var(--safe-top)); z-index: 99;
+        }
+        .search-wrap {
+            position: relative; margin-bottom: 10px;
+        }
+        .search-input {
+            width: 100%; padding: 11px 40px 11px 40px;
+            border: 2px solid var(--border); border-radius: 12px;
+            font-size: 16px; /* 防止 iOS 自动放大 */
+            background: #f8fafc; outline: none;
+            transition: var(--transition);
+            color: var(--text);
+            font-family: inherit;
+            -webkit-appearance: none;
+        }
+        .search-input:focus {
+            border-color: var(--primary-3);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+        }
+        .search-wrap .s-icon {
+            position: absolute; left: 13px; top: 50%;
+            transform: translateY(-50%); font-size: 0.95rem;
+            color: var(--text-light); pointer-events: none;
+        }
+        .search-wrap .s-clear {
+            position: absolute; right: 8px; top: 50%;
+            transform: translateY(-50%);
+            width: 26px; height: 26px; border-radius: 50%;
+            background: #e2e8f0; border: none;
+            color: var(--text-light); cursor: pointer;
+            font-size: 0.8rem; display: none;
+            align-items: center; justify-content: center;
+        }
+        .search-wrap .s-clear.show { display: flex; }
+        .search-wrap .s-clear:active { background: #cbd5e1; }
+
+        .filter-tabs {
+            display: flex; gap: 6px;
+            overflow-x: auto; -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-bottom: 2px;
+        }
+        .filter-tabs::-webkit-scrollbar { display: none; }
+        .filter-tab {
+            padding: 6px 14px; border-radius: 16px;
+            border: 1.5px solid var(--border); background: #fff;
+            font-size: 0.8rem; font-weight: 500;
+            color: var(--text-light);
+            cursor: pointer; white-space: nowrap;
+            transition: var(--transition);
+        }
+        .filter-tab.active {
+            background: var(--primary-1); color: #fff;
+            border-color: var(--primary-1);
+            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+        }
+
+        /* ===== 选择工具栏（多选时出现） ===== */
+        .select-toolbar {
+            display: none;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.06));
+            border-bottom: 2px solid rgba(16,185,129,0.25);
+            align-items: center; gap: 10px;
+            position: sticky; top: calc(128px + var(--safe-top)); z-index: 98;
+        }
+        .select-toolbar.show { display: flex; }
+        .select-toolbar .info {
+            flex: 1; font-size: 0.85rem; font-weight: 600; color: #047857;
+        }
+        .select-toolbar .info strong { font-size: 1.05rem; }
+        .select-toolbar button {
+            padding: 7px 12px; border-radius: 8px;
+            border: 1.5px solid rgba(16,185,129,0.35);
+            background: #fff; color: #047857;
+            font-size: 0.75rem; font-weight: 600;
+            cursor: pointer; white-space: nowrap;
+        }
+        .select-toolbar button.primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff; border: none;
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.35);
+        }
+
+        /* ===== 主内容 ===== */
+        .main {
+            padding: 12px 12px 120px;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* ===== 图库网格 ===== */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        @media (min-width: 640px) {
+            .gallery-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        }
+        @media (min-width: 900px) {
+            .gallery-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+            .main { padding: 20px 24px 120px; max-width: 1400px; margin: 0 auto; }
+            .search-section { padding: 16px 24px 10px; }
+        }
+
+        /* ===== 卡片 ===== */
+        .card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 2px solid transparent;
+            transition: var(--transition);
+            position: relative;
+            cursor: pointer;
+            display: flex; flex-direction: column;
+            -webkit-user-select: none; user-select: none;
+        }
+        .card:active { transform: scale(0.97); }
+        .card.selected {
+            border-color: var(--success);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2), var(--shadow-sm);
+        }
+
+        .card .thumb {
+            width: 100%; aspect-ratio: 1 / 1;
+            background: linear-gradient(135deg, #f8fafc, #eef2f7);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; position: relative;
+            flex-shrink: 0;
+        }
+        .card .thumb img {
+            width: 100%; height: 100%; object-fit: cover;
+            display: block; transition: var(--transition);
+        }
+        .card .thumb video {
+            width: 100%; height: 100%; object-fit: cover;
+            display: block; background: #000;
+            pointer-events: none;
+        }
+        .card .thumb .placeholder {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 6px;
+            color: #a0aec0; font-size: 2.4rem;
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, #f8fafc, #eef2f7);
+        }
+        .card .thumb .placeholder span {
+            font-size: 0.68rem; color: var(--text-light);
+            font-weight: 600; letter-spacing: 0.5px;
+        }
+        .card .thumb .play-icon {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem; color: rgba(255,255,255,0.9);
+            text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+            pointer-events: none; z-index: 2;
+        }
+        .card .thumb .type-badge {
+            position: absolute; top: 6px; left: 6px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(6px);
+            color: #fff; font-size: 0.55rem; font-weight: 700;
+            padding: 2px 6px; border-radius: 8px;
+            letter-spacing: 0.4px;
+            display: flex; align-items: center; gap: 2px;
+        }
+        .card .thumb .sync-badge {
+            position: absolute; top: 6px; right: 6px;
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: #fff; font-size: 0.55rem; font-weight: 700;
+            padding: 2px 6px; border-radius: 8px;
+            animation: syncingPulse 1.5s ease-in-out infinite;
+        }
+        @keyframes syncingPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        .card .thumb .checkbox {
+            position: absolute; bottom: 6px; right: 6px;
+            width: 24px; height: 24px; border-radius: 7px;
+            border: 2px solid #fff;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            color: transparent; font-size: 0.75rem; font-weight: 700;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: var(--transition);
+            z-index: 3;
+        }
+        .card.selected .thumb .checkbox {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #fff; color: #fff;
+        }
+
+        .card .info {
+            padding: 8px 10px 10px;
+            display: flex; flex-direction: column; gap: 3px;
+            flex: 1;
+        }
+        .card .name {
+            font-size: 0.78rem; font-weight: 600;
+            overflow: hidden; text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            line-height: 1.35;
+            word-break: break-all;
+        }
+        .card .meta {
+            font-size: 0.65rem; color: var(--text-light);
+            display: flex; gap: 6px; align-items: center;
+            flex-wrap: wrap;
+        }
+        .card .meta .time {
+            background: rgba(124, 58, 237, 0.08);
+            color: var(--primary-1);
+            padding: 1px 6px; border-radius: 6px;
+            font-weight: 500;
+        }
+
+        /* 桌面端 hover 效果 */
+        @media (hover: hover) and (pointer: fine) {
+            .card:hover {
+                box-shadow: var(--shadow);
+                transform: translateY(-3px);
+            }
+        }
+
+        /* ===== 空状态 ===== */
+        .empty {
+            text-align: center; padding: 60px 20px; color: var(--text-light);
+        }
+        .empty .icon { font-size: 3.5rem; margin-bottom: 10px; opacity: 0.4; }
+        .empty .text { font-size: 0.95rem; font-weight: 500; }
+        .empty .hint { font-size: 0.8rem; margin-top: 6px; opacity: 0.7; }
+
+        /* ===== 悬浮上传按钮 ===== */
+        .fab {
+            position: fixed;
+            right: 20px;
+            bottom: calc(20px + var(--safe-bottom));
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-1), var(--primary-2));
+            color: #fff; font-size: 1.8rem;
+            border: none;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 28px rgba(124, 58, 237, 0.45);
+            cursor: pointer; z-index: 90;
+            transition: var(--transition);
+        }
+        .fab:active {
+            transform: scale(0.9);
+            box-shadow: 0 4px 16px rgba(124, 58, 237, 0.5);
+        }
+        @media (min-width: 900px) {
+            .fab {
+                right: 32px;
+                bottom: 32px;
+                width: 64px; height: 64px;
+                font-size: 2rem;
+            }
+        }
+
+        /* ===== 底部抽屉 ===== */
+        .sheet-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .sheet-backdrop.show { display: block; opacity: 1; }
+
+        .sheet {
+            position: fixed;
+            left: 0; right: 0; bottom: 0;
+            background: #fff;
+            border-radius: 20px 20px 0 0;
+            z-index: 201;
+            max-height: 90vh;
+            display: flex; flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding-bottom: var(--safe-bottom);
+            overflow: hidden;
+            box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.15);
+        }
+        .sheet.show { transform: translateY(0); }
+
+        .sheet-handle {
+            width: 40px; height: 4px;
+            background: #cbd5e1; border-radius: 2px;
+            margin: 10px auto 6px;
+            flex-shrink: 0;
+        }
+        .sheet-header {
+            padding: 8px 20px 14px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .sheet-header h3 {
+            font-size: 1.05rem; font-weight: 700;
+            word-break: break-all;
+            line-height: 1.35;
+        }
+        .sheet-header .sub {
+            font-size: 0.75rem; color: var(--text-light);
+            margin-top: 4px;
+            display: flex; gap: 10px; flex-wrap: wrap;
+        }
+        .sheet-body {
+            padding: 8px 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .sheet-action {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 20px;
+            cursor: pointer; transition: var(--transition);
+            border: none; background: none; width: 100%;
+            text-align: left; font-family: inherit;
+            font-size: 0.95rem; color: var(--text);
+        }
+        .sheet-action:active { background: #f1f5f9; }
+        .sheet-action .a-icon {
+            width: 40px; height: 40px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.15rem;
+            flex-shrink: 0;
+        }
+        .sheet-action .a-text { flex: 1; }
+        .sheet-action .a-text .a-title { font-weight: 600; }
+        .sheet-action .a-text .a-desc {
+            font-size: 0.72rem; color: var(--text-light);
+            margin-top: 2px;
+        }
+        .a-icon.copy { background: #f1f5f9; }
+        .a-icon.share { background: #eff6ff; }
+        .a-icon.download { background: #f0fdf4; }
+        .a-icon.rename { background: #f5f3ff; }
+        .a-icon.delete { background: #fef2f2; }
+        .a-icon.play { background: #fff7ed; }
+
+        .sheet-cancel {
+            padding: 14px 20px calc(14px + var(--safe-bottom));
+            border-top: 8px solid #f1f5f9;
+            text-align: center;
+            font-weight: 600; color: var(--text-light);
+            cursor: pointer;
+            background: #fff;
+            border-bottom: none;
+            flex-shrink: 0;
+        }
+        .sheet-cancel:active { background: #f1f5f9; }
+
+        /* ===== 上传抽屉 / 设置抽屉内容 ===== */
+        .mode-choices {
+            padding: 8px 20px 16px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .mode-item {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 14px 16px;
+            border: 2px solid var(--border); border-radius: 12px;
+            background: #fff; cursor: pointer;
+            transition: var(--transition);
+        }
+        .mode-item.active {
+            border-color: var(--primary-1);
+            background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(79,70,229,0.08));
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.09);
+        }
+        .mode-item .m-radio {
+            width: 20px; height: 20px; border-radius: 50%;
+            border: 2.5px solid #cbd5e1; flex-shrink: 0;
+            margin-top: 2px; position: relative;
+            background: #fff; transition: var(--transition);
+        }
+        .mode-item.active .m-radio {
+            border-color: var(--primary-1);
+            background: var(--primary-1);
+        }
+        .mode-item.active .m-radio::after {
+            content: ''; position: absolute; inset: 4px;
+            background: #fff; border-radius: 50%;
+        }
+        .mode-item .m-title {
+            font-size: 0.92rem; font-weight: 600;
+            display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+        }
+        .mode-item .m-desc {
+            font-size: 0.72rem; color: var(--text-light);
+            margin-top: 3px; line-height: 1.45;
+        }
+        .mode-item .m-desc code {
+            background: rgba(245, 158, 11, 0.15);
+            padding: 1px 5px; border-radius: 3px;
+            font-size: 0.7rem; color: #b45309;
+        }
+        .badge-new {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: #fff; font-size: 0.55rem; padding: 1px 6px;
+            border-radius: 8px; font-weight: 700; letter-spacing: 0.5px;
+        }
+
+        /* 输出格式行 */
+        .format-row {
+            padding: 0 20px 16px;
+            display: none;
+        }
+        .format-row.show { display: block; }
+        .format-row .label {
+            font-size: 0.8rem; font-weight: 600;
+            margin-bottom: 8px; color: var(--text);
+        }
+        .format-btns { display: flex; gap: 8px; }
+        .format-btn {
+            flex: 1; padding: 10px;
+            border: 2px solid var(--border); border-radius: 10px;
+            background: #fff; cursor: pointer;
+            font-size: 0.82rem; font-weight: 600;
+            color: var(--text-light);
+            transition: var(--transition);
+            font-family: inherit;
+        }
+        .format-btn.active {
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+            color: #fff; border-color: #f59e0b;
+            box-shadow: 0 3px 10px rgba(245, 158, 11, 0.4);
+        }
+
+        /* ===== 设置 ===== */
+        .settings-body { padding: 16px 20px calc(20px + var(--safe-bottom)); }
+        .settings-body .field {
+            margin-bottom: 16px;
+        }
+        .settings-body .field label {
+            display: block; font-size: 0.82rem; font-weight: 600;
+            margin-bottom: 6px; color: var(--text);
+        }
+        .settings-body .field input {
+            width: 100%; padding: 12px 14px;
+            border: 2px solid var(--border); border-radius: 10px;
+            font-size: 16px; font-family: 'SF Mono', monospace;
+            outline: none; background: #fafbfc;
+            -webkit-appearance: none;
+        }
+        .settings-body .field input:focus {
+            border-color: var(--primary-3);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+        }
+        .settings-body .row { display: flex; gap: 10px; }
+        .settings-body .row button {
+            flex: 1; padding: 12px;
+            border: none; border-radius: 10px;
+            font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+            transition: var(--transition);
+        }
+        .settings-body .row .save {
+            background: linear-gradient(135deg, var(--primary-1), var(--primary-2));
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+        }
+        .settings-body .row .clear {
+            background: #f1f5f9; color: var(--text-light);
+        }
+        .settings-body .row .clear:active { background: #e2e8f0; }
+        .settings-body .status {
+            font-size: 0.8rem; color: var(--text-light);
+            margin-top: 8px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #cbd5e1;
+        }
+        .status-dot.active {
+            background: var(--success);
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+        }
+
+        /* ===== 上传队列 ===== */
+        .upload-queue {
+            padding: 0 20px 12px;
+            display: flex; flex-direction: column; gap: 8px;
+            max-height: 200px; overflow-y: auto;
+        }
+        .queue-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px;
+            background: #f8fafc; border-radius: 10px;
+            border: 1px solid var(--border);
+            font-size: 0.8rem;
+        }
+        .queue-item .q-name {
+            flex: 1; overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap;
+            font-weight: 500;
+        }
+        .queue-item .q-bar {
+            width: 60px; height: 5px;
+            background: #e2e8f0; border-radius: 3px;
+            overflow: hidden; flex-shrink: 0;
+        }
+        .queue-item .q-fill {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, var(--primary-1), var(--primary-3));
+            border-radius: 3px;
+            transition: width 0.25s ease;
+        }
+        .queue-item .q-fill.success { background: var(--success); }
+        .queue-item .q-fill.error { background: var(--danger); }
+        .queue-item .q-fill.extracting {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+            animation: extractingPulse 1.2s ease-in-out infinite;
+        }
+        @keyframes extractingPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .queue-item .q-status {
+            font-size: 0.7rem; font-weight: 600;
+            min-width: 40px; text-align: right;
+            color: var(--text-light);
+        }
+        .q-status.success { color: var(--success); }
+        .q-status.error { color: var(--danger); }
+        .q-status.extracting { color: #f59e0b; }
+
+        /* ===== Toast ===== */
+        .toast-container {
+            position: fixed;
+            top: calc(16px + var(--safe-top));
+            left: 50%; transform: translateX(-50%);
+            z-index: 9999;
+            display: flex; flex-direction: column; gap: 8px;
+            pointer-events: none;
+            max-width: calc(100vw - 40px);
+            width: 100%;
+            align-items: center;
+        }
+        .toast {
+            padding: 12px 18px;
+            border-radius: 12px;
+            color: #fff; font-size: 0.85rem;
+            font-weight: 500;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+            animation: toastIn 0.3s ease-out forwards;
+            pointer-events: auto;
+            max-width: 100%;
+            word-break: break-word;
+            line-height: 1.4;
+            text-align: center;
+        }
+        .toast-success { background: rgba(16, 185, 129, 0.95); }
+        .toast-error { background: rgba(239, 68, 68, 0.95); }
+        .toast-warning { background: rgba(245, 158, 11, 0.95); }
+        .toast-info { background: rgba(79, 70, 229, 0.95); }
+        .toast.toast-out { animation: toastOut 0.25s ease-in forwards; }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(-30px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to { opacity: 0; transform: translateY(-30px) scale(0.9); }
+        }
+
+        /* ===== 加载状态 ===== */
+        .loading {
+            display: flex; align-items: center; justify-content: center;
+            gap: 10px; padding: 60px 20px;
+            color: var(--text-light); font-size: 0.9rem;
+        }
+        .spinner {
+            display: inline-block;
+            width: 22px; height: 22px;
+            border: 3px solid #e2e8f0;
+            border-top-color: var(--primary-1);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== 隐藏文件输入 ===== */
+        input[type="file"].hidden-input {
+            position: absolute; left: -9999px;
+            width: 0; height: 0; opacity: 0;
+        }
+
+        /* ===== 顶部时间分组 ===== */
+        .group-title {
+            grid-column: 1 / -1;
+            font-size: 0.78rem; font-weight: 600;
+            color: var(--text-light);
+            padding: 8px 4px 4px;
+            display: flex; align-items: center; gap: 8px;
+            margin-top: 4px;
+        }
+        .group-title .count {
+            font-size: 0.65rem; background: #eef2f7;
+            padding: 1px 8px; border-radius: 8px;
+            color: var(--text-light); font-weight: 500;
+        }
+        .group-title::after {
+            content: ''; flex: 1; height: 1px;
+            background: linear-gradient(90deg, var(--border), transparent);
+        }
+
+        /* ===== 播放器（卡片内嵌） ===== */
+        .card .player {
+            padding: 0 10px 10px;
+        }
+        .card .player audio {
+            width: 100%; height: 32px; border-radius: 6px;
+            outline: none;
+        }
+
+        /* ===== 网络提示条 ===== */
+        .net-tip {
+            display: none;
+            padding: 8px 16px;
+            background: #fef2f2; color: #991b1b;
+            font-size: 0.78rem;
+            text-align: center;
+            border-bottom: 1px solid #fecaca;
+        }
+        .net-tip.show { display: block; }
+    </style>
+</head>
+<body>
+
+    <!-- 顶栏 -->
+    <div class="topbar">
+        <div class="logo">🎬 图床</div>
+        <button class="icon-btn" onclick="openSettings()" title="设置">⚙️</button>
+        <button class="icon-btn" onclick="refreshGallery()" title="刷新">🔄</button>
+    </div>
+
+    <!-- 网络提示 -->
+    <div class="net-tip" id="netTip">⚠️ 当前网络异常，上传可能失败</div>
+
+    <!-- 搜索 + 筛选 -->
+    <div class="search-section">
+        <div class="search-wrap">
+            <span class="s-icon">🔍</span>
+            <input type="search" id="searchInput" class="search-input" placeholder="搜索文件名…" oninput="onSearchChange(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off">
+            <button class="s-clear" id="searchClear" onclick="clearSearch()">✕</button>
+        </div>
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all" onclick="setFilter('all')">全部</button>
+            <button class="filter-tab" data-filter="image" onclick="setFilter('image')">🖼️ 图片</button>
+            <button class="filter-tab" data-filter="audio" onclick="setFilter('audio')">🎵 音频</button>
+            <button class="filter-tab" data-filter="video" onclick="setFilter('video')">🎬 视频</button>
+        </div>
+    </div>
+
+    <!-- 多选工具栏 -->
+    <div class="select-toolbar" id="selectToolbar">
+        <div class="info">已选 <strong id="selCount">0</strong> 个</div>
+        <button onclick="selectAllVisible()">全选</button>
+        <button onclick="clearSelection()">取消</button>
+        <button class="primary" id="batchDownloadBtn" onclick="batchDownload()" disabled>下载</button>
+        <button class="primary" id="batchDeleteBtn" onclick="batchDelete()" disabled style="background: linear-gradient(135deg, #ef4444, #dc2626);">删除</button>
+    </div>
+
+    <!-- 主内容 -->
+    <div class="main">
+        <div id="galleryContainer">
+            <div class="loading">
+                <span class="spinner"></span>
+                <span>加载中...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 悬浮上传按钮 -->
+    <button class="fab" onclick="openUpload()" title="上传文件">＋</button>
+
+    <!-- 上传处理模式抽屉 -->
+    <div class="sheet-backdrop" id="uploadBackdrop" onclick="closeUpload()"></div>
+    <div class="sheet" id="uploadSheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+            <h3>📤 上传文件</h3>
+            <div class="sub">选择处理模式，然后点下方按钮选择文件</div>
+        </div>
+        <div class="sheet-body">
+            <div class="mode-choices">
+                <div class="mode-item active" data-mode="off" onclick="setExtractMode('off')">
+                    <div class="m-radio"></div>
+                    <div>
+                        <div class="m-title">📤 原样上传</div>
+                        <div class="m-desc">图片、音频、视频都按原文件直接上传</div>
+                    </div>
+                </div>
+                <div class="mode-item" data-mode="both" onclick="setExtractMode('both')">
+                    <div class="m-radio"></div>
+                    <div>
+                        <div class="m-title">🎬 视频 + 音频</div>
+                        <div class="m-desc">上传视频，同时提取一份音频</div>
+                    </div>
+                </div>
+                <div class="mode-item" data-mode="audio-only" onclick="setExtractMode('audio-only')">
+                    <div class="m-radio"></div>
+                    <div>
+                        <div class="m-title">🎵 仅提取音频</div>
+                        <div class="m-desc">不上传视频，只上传提取出的音频</div>
+                    </div>
+                </div>
+                <div class="mode-item" data-mode="trim-audio" onclick="setExtractMode('trim-audio')">
+                    <div class="m-radio"></div>
+                    <div>
+                        <div class="m-title">✂️ 快捷提取 <span class="badge-new">NEW</span></div>
+                        <div class="m-desc">提取视频里的音频，剪掉末尾 5 秒，只上传音频文件</div>
+                    </div>
+                </div>
+            </div>
+            <div class="format-row" id="formatRow">
+                <div class="label">📦 输出格式</div>
+                <div class="format-btns">
+                    <button class="format-btn active" data-format="wav" onclick="setOutputFormat('wav')">🎵 WAV（无损）</button>
+                    <button class="format-btn" data-format="mp3" onclick="setOutputFormat('mp3')">🎶 MP3（小体积）</button>
+                </div>
+            </div>
+            <div class="upload-queue" id="uploadQueue"></div>
+            <div style="padding: 0 20px 20px;">
+                <button class="btn-full" style="width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--primary-1),var(--primary-2));color:#fff;font-size:1rem;font-weight:700;font-family:inherit;box-shadow:0 6px 20px rgba(124,58,237,0.35);cursor:pointer;" onclick="pickFiles()">
+                    📁 选择文件（可多选）
+                </button>
+            </div>
+        </div>
+        <div class="sheet-cancel" onclick="closeUpload()">取消</div>
+    </div>
+
+    <!-- 卡片操作抽屉 -->
+    <div class="sheet-backdrop" id="actionBackdrop" onclick="closeAction()"></div>
+    <div class="sheet" id="actionSheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+            <h3 id="actionTitle">文件名</h3>
+            <div class="sub" id="actionSub">
+                <span id="actionSize"></span>
+                <span id="actionTime"></span>
+            </div>
+        </div>
+        <div class="sheet-body" id="actionBody">
+            <!-- 动态填充 -->
+        </div>
+        <div class="sheet-cancel" onclick="closeAction()">取消</div>
+    </div>
+
+    <!-- 设置抽屉 -->
+    <div class="sheet-backdrop" id="settingsBackdrop" onclick="closeSettings()"></div>
+    <div class="sheet" id="settingsSheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+            <h3>⚙️ 设置</h3>
+        </div>
+        <div class="settings-body">
+            <div class="field">
+                <label>GitHub Token</label>
+                <input type="password" id="tokenInput" placeholder="粘贴 Personal Access Token" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                <div class="status">
+                    <span class="status-dot" id="tokenDot"></span>
+                    <span id="tokenStatusText">未设置 Token</span>
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:12px;">
+                <button class="save" onclick="saveToken()">💾 保存</button>
+                <button class="clear" onclick="clearToken()">清除</button>
+            </div>
+            <div class="field">
+                <label>操作</label>
+                <div class="row">
+                    <button class="clear" onclick="resetAll()" style="background:#fef2f2;color:#dc2626;">🔄 还原代码</button>
+                </div>
+                <div style="font-size:0.72rem;color:var(--text-light);margin-top:8px;line-height:1.5;">
+                    还原代码会清除所有本地设置（Token、搜索、选择），然后刷新页面。**不会** 删除图床文件。
+                </div>
+            </div>
+            <div style="text-align:center;font-size:0.72rem;color:var(--text-light);padding:14px 0 0;border-top:1px solid var(--border);">
+                图床 · 视频转音频版<br>
+                <span style="opacity:0.7;">🔗 https://rsqt5201314.github.io/rsqt/</span>
+            </div>
+        </div>
+        <div class="sheet-cancel" onclick="closeSettings()">关闭</div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- 隐藏的输入框 -->
+    <input type="file" id="fileInput" class="hidden-input" multiple accept="*/*">
+    <input type="file" id="mediaInput" class="hidden-input" accept="image/*,video/*,audio/*" multiple>
+
+    <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
+
+    <script>
+        // ============ 配置 ============
+        const CONFIG = {
+            GITHUB_USERNAME: 'rsqt5201314',
+            REPO_NAME: 'rsqt',
+            BRANCH: 'main',
+            MAX_FILES: 20,
+            MAX_FILE_SIZE: 100 * 1024 * 1024,
+            CONTENT_API_LIMIT: 25 * 1024 * 1024,
+            TRIM_SECONDS: 5,
+            MP3_BITRATE: 128,
+            CDN_CHECK_INTERVAL: 3000,
+            CDN_CHECK_MAX: 40,
+            AUDIO_LOAD_TIMEOUT: 8000,
+            get BASE_URL() { return `https://${this.GITHUB_USERNAME}.github.io/${this.REPO_NAME}/`; },
+            get API_BASE() { return `https://api.github.com/repos/${this.GITHUB_USERNAME}/${this.REPO_NAME}/contents/`; },
+            get REPO_API() { return `https://api.github.com/repos/${this.GITHUB_USERNAME}/${this.REPO_NAME}/`; },
+            IMAGE_EXTENSIONS: ['jpg','jpeg','jfif','png','gif','webp','svg','bmp','ico','tif','tiff','avif','heic','heif','apng'],
+            AUDIO_EXTENSIONS: ['mp3','wav','m4a','ogg','oga','opus','flac','aac','wma','aiff','aif','amr','ac3','mka','ape','weba','mid','midi'],
+            VIDEO_EXTENSIONS: ['mp4','webm','mov','m4v','avi','mkv','flv','wmv','3gp','3g2','mpg','mpeg','mpe','m2v','ts','mts','m2ts','ogv','rm','rmvb','vob','asf','f4v','divx','hevc','dat','qt'],
+        };
+
+        // ============ 状态 ============
+        let token = localStorage.getItem('gh_token') || '';
+        let galleryFiles = [];
+        let isUploading = false;
+        let currentFilter = 'all';
+        let pendingFiles = [];
+        let extractMode = 'off';
+        let outputFormat = 'wav';
+        let searchKeyword = '';
+        let selectedFiles = new Set();
+        let syncingFiles = new Set();
+        let actionTargetFile = null;
+        let isSelectMode = false;
+        let longPressTimer = null;
+
+        // ============ 工具函数 ============
+        function getFileExtension(filename) {
+            const parts = filename.split('.');
+            return parts.length > 1 ? parts.pop().toLowerCase() : '';
+        }
+        function isImage(filename) { return CONFIG.IMAGE_EXTENSIONS.includes(getFileExtension(filename)); }
+        function isAudio(filename) { return CONFIG.AUDIO_EXTENSIONS.includes(getFileExtension(filename)); }
+        function isVideo(filename) { return CONFIG.VIDEO_EXTENSIONS.includes(getFileExtension(filename)); }
+        function isSupported(filename) { return isImage(filename) || isAudio(filename) || isVideo(filename); }
+        function getFileType(filename) {
+            if (isImage(filename)) return 'image';
+            if (isAudio(filename)) return 'audio';
+            if (isVideo(filename)) return 'video';
+            return 'other';
+        }
+        function encodePath(filename) { return encodeURIComponent(filename).replace(/%2F/g, '%2F'); }
+        function getExternalUrl(filename) { return CONFIG.BASE_URL + encodePath(filename); }
+        function getApiUrl(filename) { return CONFIG.API_BASE + encodePath(filename); }
+        function getMediaUrl(filename, sha) {
+            const base = getExternalUrl(filename);
+            if (sha) return base + '?v=' + String(sha).substring(0, 8);
+            return base;
+        }
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+            return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+        }
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str == null ? '' : String(str);
+            return div.innerHTML;
+        }
+        function getAudioMimeType(ext) {
+            const map = {
+                'mp3': 'audio/mpeg', 'm4a': 'audio/mp4', 'mp4': 'audio/mp4', 'wav': 'audio/wav',
+                'ogg': 'audio/ogg', 'oga': 'audio/ogg', 'opus': 'audio/ogg', 'flac': 'audio/flac',
+                'aac': 'audio/aac', 'weba': 'audio/webm', 'mid': 'audio/midi', 'midi': 'audio/midi',
+            };
+            return map[ext] || 'audio/mpeg';
+        }
+        function getMimeForExt(ext) {
+            if (isImage('x.' + ext)) {
+                const m = { 'jpg':'image/jpeg','jpeg':'image/jpeg','jfif':'image/jpeg','png':'image/png','gif':'image/gif','webp':'image/webp','svg':'image/svg+xml','bmp':'image/bmp','ico':'image/x-icon','tif':'image/tiff','tiff':'image/tiff','avif':'image/avif' };
+                return m[ext] || 'image/*';
+            }
+            if (isAudio('x.' + ext)) return getAudioMimeType(ext);
+            if (isVideo('x.' + ext)) {
+                const m = { 'mp4':'video/mp4','m4v':'video/x-m4v','webm':'video/webm','mov':'video/quicktime','mkv':'video/x-matroska','avi':'video/x-msvideo' };
+                return m[ext] || 'video/' + ext;
+            }
+            return 'application/octet-stream';
+        }
+
+        function formatClock(seconds) {
+            if (!isFinite(seconds) || seconds < 0) seconds = 0;
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m}:${s.toFixed(1).padStart(4, '0')}`;
+        }
+        function generateTimestamp() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const mo = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            const h = String(now.getHours()).padStart(2, '0');
+            const mi = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            return `${y}${mo}${d}_${h}${mi}${s}`;
+        }
+        function addTimestampToFilename(originalName, customExt = null) {
+            const timestamp = generateTimestamp();
+            const ext = customExt || getFileExtension(originalName);
+            const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.')) || originalName;
+            const cleanName = nameWithoutExt.replace(/[^\w\u4e00-\u9fa5\-]/g, '_').substring(0, 50);
+            return `${timestamp}_${cleanName}.${ext}`;
+        }
+        function extractTimestampFromFilename(filename) {
+            const match = filename.match(/^(\d{8})_(\d{6})_/);
+            if (match) {
+                const dateStr = match[1], timeStr = match[2];
+                return new Date(
+                    parseInt(dateStr.substring(0, 4)),
+                    parseInt(dateStr.substring(4, 6)) - 1,
+                    parseInt(dateStr.substring(6, 8)),
+                    parseInt(timeStr.substring(0, 2)),
+                    parseInt(timeStr.substring(2, 4)),
+                    parseInt(timeStr.substring(4, 6))
+                );
+            }
+            return null;
+        }
+        function getDisplayName(filename) {
+            const match = filename.match(/^\d{8}_\d{6}_(.+)$/);
+            return match ? match[1] : filename;
+        }
+        function getDateGroupLabel(date) {
+            if (!date) return '未知时间';
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const fileDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            if (fileDate.getTime() === today.getTime()) return '今天';
+            else if (fileDate.getTime() === yesterday.getTime()) return '昨天';
+            else if (fileDate.getFullYear() === now.getFullYear()) return `${date.getMonth() + 1}月${date.getDate()}日`;
+            else return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+        }
+        function formatTimeDisplay(date) {
+            if (!date) return '';
+            return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        }
+        function formatFullTime(date) {
+            if (!date) return '';
+            const y = date.getFullYear();
+            const mo = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            const h = String(date.getHours()).padStart(2, '0');
+            const mi = String(date.getMinutes()).padStart(2, '0');
+            return `${y}-${mo}-${d} ${h}:${mi}`;
+        }
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        // ============ 音频编码 ============
+        function audioBufferToWav(audioBuffer, keepLength = null) {
+            const numChannels = audioBuffer.numberOfChannels;
+            const sampleRate = audioBuffer.sampleRate;
+            const format = 1, bitDepth = 16;
+            const bytesPerSample = bitDepth / 8;
+            const blockAlign = numChannels * bytesPerSample;
+            const length = keepLength == null ? audioBuffer.length : Math.max(1, Math.min(keepLength, audioBuffer.length));
+            const dataSize = length * blockAlign;
+            const bufferSize = 44 + dataSize;
+            const buffer = new ArrayBuffer(bufferSize);
+            const view = new DataView(buffer);
+            function ws(v, o, s) { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); }
+            ws(view, 0, 'RIFF'); view.setUint32(4, 36 + dataSize, true);
+            ws(view, 8, 'WAVE'); ws(view, 12, 'fmt ');
+            view.setUint32(16, 16, true); view.setUint16(20, format, true);
+            view.setUint16(22, numChannels, true); view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * blockAlign, true); view.setUint16(32, blockAlign, true);
+            view.setUint16(34, bitDepth, true); ws(view, 36, 'data');
+            view.setUint32(40, dataSize, true);
+            const channels = [];
+            for (let i = 0; i < numChannels; i++) channels.push(audioBuffer.getChannelData(i));
+            let offset = 44;
+            for (let i = 0; i < length; i++) {
+                for (let ch = 0; ch < numChannels; ch++) {
+                    let sample = Math.max(-1, Math.min(1, channels[ch][i]));
+                    sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+                    view.setInt16(offset, sample, true);
+                    offset += 2;
+                }
+            }
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+        function audioBufferToMp3(audioBuffer, keepLength, bitrate = 128) {
+            if (typeof lamejs === 'undefined') throw new Error('MP3 编码器未加载');
+            const numChannels = Math.min(2, audioBuffer.numberOfChannels);
+            const sampleRate = audioBuffer.sampleRate;
+            const length = keepLength == null ? audioBuffer.length : Math.max(1, Math.min(keepLength, audioBuffer.length));
+            const left = audioBuffer.getChannelData(0);
+            const right = numChannels > 1 ? audioBuffer.getChannelData(1) : null;
+            const leftInt16 = new Int16Array(length);
+            const rightInt16 = right ? new Int16Array(length) : null;
+            for (let i = 0; i < length; i++) {
+                let s = Math.max(-1, Math.min(1, left[i]));
+                leftInt16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+                if (right) {
+                    let s2 = Math.max(-1, Math.min(1, right[i]));
+                    rightInt16[i] = s2 < 0 ? s2 * 0x8000 : s2 * 0x7FFF;
+                }
+            }
+            const mp3encoder = new lamejs.Mp3Encoder(numChannels, sampleRate, bitrate);
+            const sampleBlockSize = 1152;
+            const mp3Data = [];
+            for (let i = 0; i < length; i += sampleBlockSize) {
+                const leftChunk = leftInt16.subarray(i, i + sampleBlockSize);
+                let mp3buf;
+                if (right) {
+                    const rightChunk = rightInt16.subarray(i, i + sampleBlockSize);
+                    mp3buf = mp3encoder.encodeBuffer(leftChunk, rightChunk);
+                } else mp3buf = mp3encoder.encodeBuffer(leftChunk);
+                if (mp3buf.length > 0) mp3Data.push(new Int8Array(mp3buf));
+            }
+            const end = mp3encoder.flush();
+            if (end.length > 0) mp3Data.push(new Int8Array(end));
+            return new Blob(mp3Data, { type: 'audio/mpeg' });
+        }
+        async function decodeToAudioBuffer(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) throw new Error('浏览器不支持 AudioContext');
+            const ctx = new Ctx();
+            try { return await ctx.decodeAudioData(arrayBuffer); }
+            finally { try { ctx.close(); } catch (e) {} }
+        }
+        async function extractAudioFromVideo(file, options = {}) {
+            const { trimEndSeconds = null, format = 'wav' } = options;
+            const audioBuffer = await decodeToAudioBuffer(file);
+            const originalDuration = audioBuffer.duration;
+            let keepLength = audioBuffer.length;
+            let trimSeconds = 0;
+            if (trimEndSeconds && trimEndSeconds > 0) {
+                const trimSamples = Math.floor(trimEndSeconds * audioBuffer.sampleRate);
+                keepLength = audioBuffer.length - trimSamples;
+                if (keepLength <= 0) throw new Error(`音频总长不足 ${trimEndSeconds} 秒`);
+                trimSeconds = trimEndSeconds;
+            }
+            const keptDuration = keepLength / audioBuffer.sampleRate;
+            let blob, ext;
+            if (format === 'mp3') { blob = audioBufferToMp3(audioBuffer, keepLength, CONFIG.MP3_BITRATE); ext = 'mp3'; }
+            else { blob = audioBufferToWav(audioBuffer, keepLength); ext = 'wav'; }
+            return { blob, ext, originalDuration, keptDuration, trimSeconds, format };
+        }
+        function friendlyExtractError(err) {
+            const m = (err && err.message) ? err.message : '未知错误';
+            if (/decode|Unable to decode|Decoding failed|不支持的格式/i.test(m)) return '该视频的音频编码手机浏览器无法解码，建议改用「原样上传」模式或先转成 MP4（H.264+AAC）';
+            if (/AudioContext/i.test(m)) return '当前浏览器不支持音频解码';
+            if (/MP3 编码器未加载/i.test(m)) return 'MP3 编码器未加载，请改用 WAV 输出';
+            return m;
+        }
+
+        // ============ Toast ============
+        function showToast(message, type = 'info', duration = 2500) {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const icons = { success: '✅', error: '❌', warning: '⚠️', info: '💡' };
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `${icons[type] || icons.info} ${escapeHtml(message)}`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('toast-out');
+                setTimeout(() => toast.remove(), 250);
+            }, duration);
+        }
+
+        // ============ 抽屉控制 ============
+        function openSheet(id, backdropId) {
+            document.getElementById(backdropId).classList.add('show');
+            document.getElementById(id).classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeSheet(id, backdropId) {
+            document.getElementById(backdropId).classList.remove('show');
+            document.getElementById(id).classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        function openUpload() { openSheet('uploadSheet', 'uploadBackdrop'); }
+        function closeUpload() { closeSheet('uploadSheet', 'uploadBackdrop'); }
+        function openSettings() {
+            document.getElementById('tokenInput').value = token ? '••••••••••••' : '';
+            updateTokenStatus();
+            openSheet('settingsSheet', 'settingsBackdrop');
+        }
+        function closeSettings() { closeSheet('settingsSheet', 'settingsBackdrop'); }
+        function closeAction() { closeSheet('actionSheet', 'actionBackdrop'); }
+
+        // ============ 模式切换 ============
+        function setExtractMode(mode) {
+            extractMode = mode;
+            document.querySelectorAll('.mode-item').forEach(el => el.classList.toggle('active', el.dataset.mode === mode));
+            const formatRow = document.getElementById('formatRow');
+            if (mode === 'trim-audio') formatRow.classList.add('show');
+            else formatRow.classList.remove('show');
+            const tips = {
+                'off': '📤 原样上传',
+                'both': '🎬 视频 + 音频',
+                'audio-only': '🎵 仅提取音频',
+                'trim-audio': '✂️ 快捷提取（剪掉末尾 5 秒）',
+            };
+            showToast(tips[mode] || '已切换模式', 'success', 1500);
+        }
+        function setOutputFormat(fmt) {
+            outputFormat = fmt;
+            document.querySelectorAll('.format-btn').forEach(el => el.classList.toggle('active', el.dataset.format === fmt));
+            showToast('输出格式：' + (fmt === 'mp3' ? 'MP3' : 'WAV'), 'success', 1500);
+        }
+        function pickFiles() {
+            document.getElementById('fileInput').click();
+        }
+
+        // ============ Token ============
+        function saveToken() {
+            const input = document.getElementById('tokenInput');
+            const val = input.value.trim();
+            if (!val || val === '••••••••••••') {
+                if (!val) { showToast('请输入 Token', 'warning'); return; }
+                // 已是遮罩，直接关闭
+                closeSettings();
+                return;
+            }
+            token = val;
+            localStorage.setItem('gh_token', token);
+            input.value = '';
+            updateTokenStatus();
+            showToast('Token 已保存', 'success');
+            closeSettings();
+            loadGallery();
+        }
+        function clearToken() {
+            if (!confirm('确定清除 Token？')) return;
+            token = '';
+            localStorage.removeItem('gh_token');
+            document.getElementById('tokenInput').value = '';
+            updateTokenStatus();
+            galleryFiles = [];
+            selectedFiles.clear();
+            syncingFiles.clear();
+            renderGallery();
+            showToast('Token 已清除', 'info');
+        }
+        function updateTokenStatus() {
+            const dot = document.getElementById('tokenDot');
+            const text = document.getElementById('tokenStatusText');
+            if (token) { dot.classList.add('active'); text.textContent = 'Token 已设置 ✓'; }
+            else { dot.classList.remove('active'); text.textContent = '未设置 Token'; }
+        }
+        function resetAll() {
+            if (!confirm('⚠️ 还原代码到初始状态？\n\n会清除 Token、搜索、选择等所有本地数据，然后刷新。\n\n图床文件不受影响。')) return;
+            if (!confirm('再次确认：确定要还原吗？')) return;
+            try { localStorage.clear(); } catch (e) {}
+            try { sessionStorage.clear(); } catch (e) {}
+            showToast('正在还原...', 'success', 1200);
+            setTimeout(() => { location.href = location.origin + location.pathname; }, 800);
+        }
+
+        // ============ GitHub API ============
+        function getHeaders() {
+            return {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28',
+            };
+        }
+        async function fetchGalleryFromGitHub() {
+            if (!token) throw new Error('未设置 Token');
+            const url = `${CONFIG.API_BASE}?per_page=100`;
+            const resp = await fetch(url, { headers: getHeaders() });
+            if (!resp.ok) {
+                let msg = `获取失败 (HTTP ${resp.status})`;
+                try {
+                    const data = await resp.json();
+                    if (data.message) msg += `: ${data.message}`;
+                    if (resp.status === 401) msg = 'Token 无效或已过期';
+                    if (resp.status === 404) msg = '仓库不存在';
+                } catch (e) {}
+                throw new Error(msg);
+            }
+            const data = await resp.json();
+            return data
+                .filter(item => item.type === 'file' && !item.name.startsWith('.'))
+                .map(item => ({
+                    name: item.name,
+                    sha: item.sha,
+                    size: item.size || 0,
+                    timestamp: extractTimestampFromFilename(item.name),
+                    displayName: getDisplayName(item.name),
+                }));
+        }
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = () => reject(new Error('文件读取失败'));
+                reader.readAsDataURL(blob);
+            });
+        }
+        function uploadViaContentsApi(base64Data, filename, existingSha = null) {
+            return new Promise((resolve, reject) => {
+                const body = { message: `Upload ${filename}`, content: base64Data, branch: CONFIG.BRANCH };
+                if (existingSha) { body.sha = existingSha; body.message = `Update ${filename}`; }
+                const xhr = new XMLHttpRequest();
+                xhr.open('PUT', getApiUrl(filename), true);
+                xhr.setRequestHeader('Authorization', `token ${token}`);
+                xhr.setRequestHeader('Accept', 'application/vnd.github+json');
+                xhr.setRequestHeader('X-GitHub-Api-Version', '2022-11-28');
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.upload.onprogress = function (e) {
+                    if (e.lengthComputable) {
+                        const pct = Math.round((e.loaded / e.total) * 100);
+                        onUploadProgress(filename, pct);
+                    }
+                };
+                xhr.onload = function () {
+                    if (xhr.status >= 200 && xhr.status < 300) resolve(JSON.parse(xhr.responseText));
+                    else {
+                        let msg = `上传失败 (HTTP ${xhr.status})`;
+                        try {
+                            const data = JSON.parse(xhr.responseText);
+                            if (data.message) msg += `: ${data.message}`;
+                            if (xhr.status === 422) msg = '文件已存在';
+                            if (xhr.status === 401) msg = 'Token 无效';
+                            if (xhr.status === 403) msg = 'Token 权限不足';
+                            if (xhr.status === 413) msg = '文件超过 100MB';
+                        } catch (e) {}
+                        reject(new Error(msg));
+                    }
+                };
+                xhr.onerror = function () { reject(new Error('网络错误')); };
+                xhr.send(JSON.stringify(body));
+            });
+        }
+        async function repoApi(path, options = {}) {
+            const resp = await fetch(CONFIG.REPO_API + path, {
+                method: options.method || 'GET',
+                headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+                body: options.body ? JSON.stringify(options.body) : undefined,
+            });
+            const text = await resp.text();
+            let data = null;
+            try { data = text ? JSON.parse(text) : null; } catch (e) {}
+            if (!resp.ok) throw new Error((data && data.message) ? data.message : `HTTP ${resp.status}`);
+            return data;
+        }
+        async function uploadViaGitDataApi(base64Data, filename) {
+            const progress = (p) => onUploadProgress(filename, p);
+            progress(5);
+            const ref = await repoApi(`git/ref/heads/${CONFIG.BRANCH}`);
+            const commitSha = ref.object.sha;
+            progress(12);
+            const commit = await repoApi(`git/commits/${commitSha}`);
+            const baseTreeSha = commit.tree.sha;
+            progress(22);
+            const blob = await repoApi('git/blobs', { method: 'POST', body: { content: base64Data, encoding: 'base64' } });
+            progress(72);
+            const tree = await repoApi('git/trees', { method: 'POST', body: { base_tree: baseTreeSha, tree: [{ path: filename, mode: '100644', type: 'blob', sha: blob.sha }] } });
+            progress(85);
+            const newCommit = await repoApi('git/commits', { method: 'POST', body: { message: `Upload ${filename}`, tree: tree.sha, parents: [commitSha] } });
+            progress(94);
+            await repoApi(`git/refs/heads/${CONFIG.BRANCH}`, { method: 'PATCH', body: { sha: newCommit.sha, force: false } });
+            progress(100);
+            return newCommit;
+        }
+        async function uploadBlobToGitHub(blob, filename, existingSha = null) {
+            const base64Data = await blobToBase64(blob);
+            if (blob.size > CONFIG.CONTENT_API_LIMIT) return uploadViaGitDataApi(base64Data, filename);
+            return uploadViaContentsApi(base64Data, filename, existingSha);
+        }
+        async function deleteFileFromGitHub(filename, sha) {
+            if (!token) throw new Error('未设置 Token');
+            const resp = await fetch(getApiUrl(filename), {
+                method: 'DELETE',
+                headers: getHeaders(),
+                body: JSON.stringify({ message: `Delete ${filename}`, sha, branch: CONFIG.BRANCH }),
+            });
+            if (!resp.ok) {
+                let msg = `删除失败 (HTTP ${resp.status})`;
+                try { const data = await resp.json(); if (data.message) msg += `: ${data.message}`; } catch (e) {}
+                throw new Error(msg);
+            }
+            return true;
+        }
+
+        // ============ 上传队列 UI ============
+        function onUploadProgress(filename, pct) {
+            const items = document.querySelectorAll('.queue-item');
+            for (const item of items) {
+                if (item.dataset.filename === filename) {
+                    const fill = item.querySelector('.q-fill');
+                    const status = item.querySelector('.q-status');
+                    if (fill) fill.style.width = pct + '%';
+                    if (status) { status.textContent = pct + '%'; status.className = 'q-status uploading'; }
+                    break;
+                }
+            }
+        }
+        function addQueueItem(filename, size, displayName, isExtract = false) {
+            const queue = document.getElementById('uploadQueue');
+            const item = document.createElement('div');
+            item.className = 'queue-item';
+            item.dataset.filename = filename;
+            const icon = isVideo(filename) ? '🎬' : isImage(filename) ? '🖼️' : isAudio(filename) ? '🎵' : '📄';
+            item.innerHTML = `
+                <span style="font-size:1.1rem;">${icon}</span>
+                <span class="q-name">${escapeHtml(displayName || filename)}</span>
+                <div class="q-bar"><div class="q-fill"></div></div>
+                <span class="q-status">${isExtract ? '待提取' : '等待'}</span>
+            `;
+            queue.appendChild(item);
+        }
+        function updateQueueItem(filename, status, customText = null) {
+            const items = document.querySelectorAll('.queue-item');
+            for (const item of items) {
+                if (item.dataset.filename === filename) {
+                    const fill = item.querySelector('.q-fill');
+                    const label = item.querySelector('.q-status');
+                    if (status === 'extracting') {
+                        if (fill) { fill.classList.add('extracting'); fill.style.width = '100%'; }
+                        if (label) { label.textContent = customText || '提取中'; label.className = 'q-status extracting'; }
+                    } else {
+                        if (fill) { fill.classList.add(status); fill.style.width = '100%'; }
+                        if (label) {
+                            label.textContent = customText || (status === 'success' ? '完成' : '失败');
+                            label.className = `q-status ${status}`;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        // ============ 渲染图库 ============
+        function getVisibleFiles() {
+            let files = galleryFiles;
+            if (currentFilter !== 'all') files = files.filter(f => getFileType(f.name) === currentFilter);
+            if (searchKeyword) {
+                files = files.filter(f => {
+                    const display = (f.displayName || getDisplayName(f.name)).toLowerCase();
+                    const raw = f.name.toLowerCase();
+                    return display.includes(searchKeyword) || raw.includes(searchKeyword);
+                });
+            }
+            return files;
+        }
+
+        function renderGallery() {
+            const container = document.getElementById('galleryContainer');
+            if (!token) {
+                container.innerHTML = `<div class="empty"><div class="icon">🔑</div><div class="text">请先设置 GitHub Token</div><div class="hint">点击右上角 ⚙️ 设置 Token</div></div>`;
+                return;
+            }
+            let displayFiles = getVisibleFiles();
+            displayFiles.sort((a, b) => {
+                if (a.timestamp && b.timestamp) return b.timestamp - a.timestamp;
+                if (a.timestamp) return -1;
+                if (b.timestamp) return 1;
+                return b.name.localeCompare(a.name);
+            });
+            if (displayFiles.length === 0) {
+                const emptyMsg = searchKeyword ? `未找到「${escapeHtml(searchKeyword)}」` : `暂无${currentFilter !== 'all' ? '此类' : ''}文件`;
+                container.innerHTML = `<div class="empty"><div class="icon">📂</div><div class="text">${emptyMsg}</div><div class="hint">${searchKeyword ? '试试换个关键词' : '点击右下角 ＋ 上传文件'}</div></div>`;
+                return;
+            }
+            // 按日期分组
+            const groups = {};
+            for (const file of displayFiles) {
+                const label = getDateGroupLabel(file.timestamp);
+                if (!groups[label]) groups[label] = [];
+                groups[label].push(file);
+            }
+            const groupOrder = Object.keys(groups).sort((a, b) => {
+                const special = { '今天': 0, '昨天': 1, '未知时间': 999 };
+                const ao = special[a] !== undefined ? special[a] : 2;
+                const bo = special[b] !== undefined ? special[b] : 2;
+                return ao - bo;
+            });
+            let html = '<div class="gallery-grid">';
+            for (const groupLabel of groupOrder) {
+                const groupFiles = groups[groupLabel];
+                html += `<div class="group-title"><span>📅</span><span>${escapeHtml(groupLabel)}</span><span class="count">${groupFiles.length}个</span></div>`;
+                for (const file of groupFiles) html += renderCard(file);
+            }
+            html += '</div>';
+            container.innerHTML = html;
+            // 音频超时兜底
+            document.querySelectorAll('audio[data-src]').forEach(el => {
+                if (!el.dataset.armed) {
+                    el.dataset.armed = '1';
+                    armAudioTimeout(el);
+                }
+            });
+            updateSelectionUI();
+        }
+
+        function renderCard(file) {
+            const ext = getFileExtension(file.name);
+            const externalUrl = getExternalUrl(file.name);
+            const mediaUrl = getMediaUrl(file.name, file.sha);
+            const isImg = isImage(file.name);
+            const isAud = isAudio(file.name);
+            const isVid = isVideo(file.name);
+            const typeLabel = isVid ? '视频' : isImg ? '图片' : isAud ? '音频' : '文件';
+            const typeIcon = isVid ? '🎬' : isImg ? '🖼️' : isAud ? '🎵' : '📄';
+            const displayName = file.displayName || getDisplayName(file.name);
+            const timeBadge = file.timestamp ? formatTimeDisplay(file.timestamp) : '';
+            const safeName = escapeHtml(file.name);
+            const audioMime = getAudioMimeType(ext);
+            const isSelected = selectedFiles.has(file.name);
+            const isSyncing = syncingFiles.has(file.name);
+            const safeMediaUrl = escapeHtml(mediaUrl);
+
+            let thumbHtml;
+            if (isImg) {
+                thumbHtml = `<img src="${safeMediaUrl}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'>🖼️<span>加载失败</span></div>';">`;
+            } else if (isVid) {
+                thumbHtml = `<video preload="metadata" muted playsinline webkit-playsinline onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'>🎬<span>无法预览</span></div>';"><source src="${safeMediaUrl}" type="video/${ext}"></video><span class="play-icon">▶</span>`;
+            } else if (isAud) {
+                thumbHtml = `<div class="placeholder">🎵<span>${ext.toUpperCase()}</span></div>`;
+            } else {
+                thumbHtml = `<div class="placeholder">📄<span>${ext.toUpperCase()}</span></div>`;
+            }
+
+            return `
+                <div class="card${isSelected ? ' selected' : ''}" data-filename="${safeName}">
+                    <div class="thumb">
+                        ${timeBadge ? `<span class="type-badge">🕐 ${timeBadge}</span>` : ''}
+                        ${isSyncing ? `<span class="sync-badge">⏳同步</span>` : ''}
+                        <div class="checkbox" data-cb="${safeName}">✓</div>
+                        ${thumbHtml}
+                    </div>
+                    <div class="info">
+                        <div class="name">${escapeHtml(displayName)}</div>
+                        <div class="meta">
+                            <span>${formatFileSize(file.size)}</span>
+                            <span style="opacity:0.5;">·</span>
+                            <span>${typeIcon}${typeLabel}</span>
+                        </div>
+                    </div>
+                    ${isAud ? `
+                        <div class="player">
+                            <audio controls preload="metadata" data-src="${safeMediaUrl}" data-mime="${audioMime}" onerror="tryPlayAudioBlob(this)">
+                                <source src="${safeMediaUrl}" type="${audioMime}">
+                            </audio>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // 音频超时兜底
+        async function playAudioViaBlob(audioEl, url, mime) {
+            try {
+                const resp = await fetch(url, { mode: 'cors' });
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                const raw = await resp.blob();
+                const blob = new Blob([raw], { type: mime });
+                const blobUrl = URL.createObjectURL(blob);
+                audioEl.src = blobUrl;
+                audioEl.load();
+            } catch (e) {
+                console.error('[音频 blob 加载失败]', e);
+            }
+        }
+        function tryPlayAudioBlob(audioEl) {
+            if (audioEl.dataset.blobTried === '1') return;
+            audioEl.dataset.blobTried = '1';
+            const url = audioEl.dataset.src;
+            const mime = audioEl.dataset.mime || 'audio/mpeg';
+            if (url) playAudioViaBlob(audioEl, url, mime);
+        }
+        function armAudioTimeout(audioEl) {
+            if (audioEl.readyState >= 1) return;
+            if (audioEl._timeoutId) clearTimeout(audioEl._timeoutId);
+            audioEl._timeoutId = setTimeout(() => {
+                if (audioEl.readyState >= 1) return;
+                console.warn('[音频超时] 走 blob 兜底');
+                tryPlayAudioBlob(audioEl);
+            }, CONFIG.AUDIO_LOAD_TIMEOUT);
+            audioEl.addEventListener('loadedmetadata', function once() {
+                audioEl.removeEventListener('loadedmetadata', once);
+                if (audioEl._timeoutId) { clearTimeout(audioEl._timeoutId); audioEl._timeoutId = null; }
+            });
+        }
+
+        // ============ 卡片交互 ============
+        // 使用事件委托
+        document.getElementById('galleryContainer').addEventListener('click', function (e) {
+            const card = e.target.closest('.card');
+            if (!card) return;
+            const filename = card.dataset.filename;
+            // 点的是勾选框
+            if (e.target.closest('.checkbox')) {
+                e.stopPropagation();
+                toggleFileSelect(filename);
+                return;
+            }
+            // 点的是音频播放器内部
+            if (e.target.closest('.player')) return;
+            // 多选模式下：点卡片切换选中
+            if (isSelectMode) {
+                toggleFileSelect(filename);
+                return;
+            }
+            // 普通模式：打开操作菜单
+            openActionSheet(filename);
+        });
+
+        // 长按进入多选
+        document.getElementById('galleryContainer').addEventListener('touchstart', function (e) {
+            const card = e.target.closest('.card');
+            if (!card) return;
+            if (e.target.closest('.player')) return;
+            if (e.target.closest('.checkbox')) return;
+            longPressTimer = setTimeout(() => {
+                if (!isSelectMode) enterSelectMode();
+                toggleFileSelect(card.dataset.filename);
+                if (navigator.vibrate) navigator.vibrate(30);
+            }, 500);
+        }, { passive: true });
+        ['touchend', 'touchmove', 'touchcancel'].forEach(ev => {
+            document.getElementById('galleryContainer').addEventListener(ev, () => {
+                if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+            }, { passive: true });
+        });
+
+        // ============ 选择状态 ============
+        function enterSelectMode() {
+            isSelectMode = true;
+            document.getElementById('selectToolbar').classList.add('show');
+        }
+        function exitSelectMode() {
+            isSelectMode = false;
+            selectedFiles.clear();
+            document.getElementById('selectToolbar').classList.remove('show');
+            document.querySelectorAll('.card.selected').forEach(c => c.classList.remove('selected'));
+            updateSelectionUI();
+        }
+        function toggleFileSelect(filename) {
+            if (!isSelectMode) enterSelectMode();
+            if (selectedFiles.has(filename)) selectedFiles.delete(filename);
+            else selectedFiles.add(filename);
+            const card = document.querySelector(`.card[data-filename="${CSS.escape(filename)}"]`);
+            if (card) card.classList.toggle('selected', selectedFiles.has(filename));
+            if (selectedFiles.size === 0) exitSelectMode();
+            updateSelectionUI();
+        }
+        function selectAllVisible() {
+            getVisibleFiles().forEach(f => selectedFiles.add(f.name));
+            document.querySelectorAll('.card').forEach(c => {
+                if (selectedFiles.has(c.dataset.filename)) c.classList.add('selected');
+            });
+            updateSelectionUI();
+        }
+        function clearSelection() { exitSelectMode(); }
+        function updateSelectionUI() {
+            const count = selectedFiles.size;
+            document.getElementById('selCount').textContent = count;
+            document.getElementById('batchDownloadBtn').disabled = count === 0;
+            document.getElementById('batchDeleteBtn').disabled = count === 0;
+        }
+
+        // ============ 操作抽屉 ============
+        function openActionSheet(filename) {
+            const file = galleryFiles.find(f => f.name === filename);
+            if (!file) { showToast('文件不存在', 'warning'); return; }
+            actionTargetFile = file;
+            const displayName = file.displayName || getDisplayName(file.name);
+            document.getElementById('actionTitle').textContent = displayName;
+            document.getElementById('actionSize').textContent = formatFileSize(file.size);
+            document.getElementById('actionTime').textContent = file.timestamp ? formatFullTime(file.timestamp) : '';
+            const isAud = isAudio(file.name);
+            const isVid = isVideo(file.name);
+
+            const actions = [];
+            // 复制链接
+            actions.push({ icon: '📋', cls: 'copy', title: '复制链接', desc: '复制文件外链到剪贴板', fn: () => { copyLink(filename); closeAction(); } });
+            // 分享（Web Share API）
+            if (navigator.share) {
+                actions.push({ icon: '📤', cls: 'share', title: '分享', desc: '分享到微信 / QQ 等 App', fn: () => { shareFile(filename); closeAction(); } });
+            }
+            // 下载
+            actions.push({ icon: '💾', cls: 'download', title: '下载到本机', desc: '保存到手机"下载"文件夹', fn: () => { downloadFile(filename); closeAction(); } });
+            // 重命名
+            actions.push({ icon: '✏️', cls: 'rename', title: '重命名', desc: '修改文件名', fn: () => { closeAction(); renameFile(filename); } });
+            // 删除
+            actions.push({ icon: '🗑️', cls: 'delete', title: '删除', desc: '从图床删除（不可恢复）', fn: () => { deleteFile(filename); closeAction(); } });
+
+            document.getElementById('actionBody').innerHTML = actions.map((a, i) => `
+                <button class="sheet-action" data-action-idx="${i}">
+                    <div class="a-icon ${a.cls}">${a.icon}</div>
+                    <div class="a-text">
+                        <div class="a-title">${a.title}</div>
+                        <div class="a-desc">${a.desc}</div>
+                    </div>
+                </button>
+            `).join('');
+
+            // 绑定点击
+            document.querySelectorAll('#actionBody .sheet-action').forEach((btn, i) => {
+                btn.addEventListener('click', () => actions[i].fn());
+            });
+
+            openSheet('actionSheet', 'actionBackdrop');
+        }
+
+        // ============ 操作函数 ============
+        function copyLink(filename) {
+            const url = getExternalUrl(filename);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => showToast('链接已复制', 'success')).catch(() => fallbackCopy(url));
+            } else fallbackCopy(url);
+        }
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try { document.execCommand('copy'); showToast('链接已复制', 'success'); }
+            catch (e) { showToast('复制失败', 'error'); }
+            document.body.removeChild(textarea);
+        }
+        async function shareFile(filename) {
+            const url = getExternalUrl(filename);
+            try {
+                if (navigator.share) {
+                    await navigator.share({ title: getDisplayName(filename), url });
+                } else {
+                    copyLink(filename);
+                }
+            } catch (e) {
+                if (e.name !== 'AbortError') showToast('分享失败', 'error');
+            }
+        }
+        async function downloadFile(filename) {
+            const url = getExternalUrl(filename);
+            const displayName = getDisplayName(filename);
+            try {
+                showToast('正在准备下载...', 'info', 1200);
+                // 先尝试 blob 下载（更可靠）
+                const resp = await fetch(url);
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                const blob = await resp.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl; a.download = displayName;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
+                showToast('已开始下载：' + displayName, 'success', 2000);
+            } catch (e) {
+                console.warn('[下载失败] 直接用原链接', e);
+                // 兜底：直接打开链接让浏览器处理
+                window.open(url, '_blank');
+                showToast('请长按页面选择"保存到手机"', 'info', 4000);
+            }
+        }
+        async function batchDownload() {
+            if (selectedFiles.size === 0) { showToast('请先选择文件', 'warning'); return; }
+            const files = galleryFiles.filter(f => selectedFiles.has(f.name));
+            if (!confirm(`即将下载 ${files.length} 个文件。\n\n手机会依次弹出下载，请允许。`)) return;
+            for (let i = 0; i < files.length; i++) {
+                await downloadFile(files[i].name);
+                await sleep(600);
+            }
+            showToast(`已发起 ${files.length} 个文件下载`, 'success', 3000);
+        }
+        async function batchDelete() {
+            if (selectedFiles.size === 0) { showToast('请先选择文件', 'warning'); return; }
+            if (!confirm(`确定删除选中的 ${selectedFiles.size} 个文件？此操作不可恢复。`)) return;
+            const files = galleryFiles.filter(f => selectedFiles.has(f.name));
+            let ok = 0, fail = 0;
+            for (const file of files) {
+                try {
+                    await deleteFileFromGitHub(file.name, file.sha);
+                    ok++;
+                } catch (e) { fail++; console.error(e); }
+            }
+            showToast(`删除完成：${ok} 个成功${fail > 0 ? `，${fail} 个失败` : ''}`, fail > 0 ? 'warning' : 'success', 3000);
+            exitSelectMode();
+            loadGallery();
+        }
+        async function renameFile(oldName) {
+            const file = galleryFiles.find(f => f.name === oldName);
+            if (!file) { showToast('文件不存在', 'warning'); return; }
+            const ext = getFileExtension(oldName);
+            const oldDisplay = getDisplayName(oldName);
+            const oldBase = oldDisplay.toLowerCase().endsWith('.' + ext)
+                ? oldDisplay.substring(0, oldDisplay.length - ext.length - 1)
+                : oldDisplay;
+            const input = prompt(`重命名文件\n\n当前：${oldBase}.${ext}\n\n请输入新的文件名（不含扩展名）：`, oldBase);
+            if (input === null) return;
+            const newBase = input.trim();
+            if (!newBase) { showToast('名称不能为空', 'warning'); return; }
+            if (newBase === oldBase) { showToast('未修改', 'info'); return; }
+            const tsMatch = oldName.match(/^(\d{8}_\d{6})_/);
+            const prefix = tsMatch ? tsMatch[1] + '_' : generateTimestamp() + '_';
+            const cleanName = newBase.replace(/[^\w\u4e00-\u9fa5\-]/g, '_').substring(0, 50);
+            const newName = `${prefix}${cleanName}.${ext}`;
+            if (newName === oldName) { showToast('名称未变化', 'info'); return; }
+            try {
+                showToast('正在重命名...', 'info', 1500);
+                const resp = await fetch(getExternalUrl(oldName) + '?t=' + Date.now());
+                if (!resp.ok) throw new Error('下载旧文件失败');
+                const blob = await resp.blob();
+                await uploadBlobToGitHub(blob, newName);
+                syncingFiles.add(newName);
+                await loadGallery();
+                // 后台轮询
+                let accessible = false;
+                for (let i = 0; i < CONFIG.CDN_CHECK_MAX; i++) {
+                    await sleep(CONFIG.CDN_CHECK_INTERVAL);
+                    try {
+                        const check = await fetch(getExternalUrl(newName) + '?check=' + Date.now(), { method: 'HEAD', cache: 'no-store' });
+                        if (check.ok) { accessible = true; break; }
+                    } catch (e) {}
+                }
+                try { await deleteFileFromGitHub(oldName, file.sha); } catch (e) {}
+                syncingFiles.delete(newName);
+                await loadGallery();
+                showToast(accessible ? `✅ 已重命名为 ${newBase}.${ext}` : `⚠️ 重命名完成，CDN 同步中`, accessible ? 'success' : 'warning', 3000);
+            } catch (err) {
+                console.error(err);
+                syncingFiles.delete(newName);
+                showToast('重命名失败：' + err.message, 'error', 4000);
+            }
+        }
+        async function deleteFile(filename) {
+            const file = galleryFiles.find(f => f.name === filename);
+            if (!file) { showToast('文件不存在', 'warning'); return; }
+            if (!confirm(`确定删除"${getDisplayName(filename)}"？\n\n此操作不可恢复。`)) return;
+            try {
+                await deleteFileFromGitHub(filename, file.sha);
+                showToast('已删除', 'success');
+                galleryFiles = galleryFiles.filter(f => f.name !== filename);
+                selectedFiles.delete(filename);
+                syncingFiles.delete(filename);
+                renderGallery();
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        // ============ 搜索 / 筛选 ============
+        function onSearchChange(value) {
+            searchKeyword = (value || '').trim().toLowerCase();
+            const clearBtn = document.getElementById('searchClear');
+            clearBtn.classList.toggle('show', !!searchKeyword);
+            renderGallery();
+        }
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            searchKeyword = '';
+            document.getElementById('searchClear').classList.remove('show');
+            renderGallery();
+        }
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.toggle('active', t.dataset.filter === filter));
+            renderGallery();
+        }
+        function refreshGallery() { loadGallery(); }
+
+        // ============ 上传流程 ============
+        document.getElementById('fileInput').addEventListener('change', function (e) {
+            if (e.target.files && e.target.files.length > 0) {
+                handleFiles(e.target.files);
+                e.target.value = '';
+            }
+        });
+
+        async function handleFiles(fileList) {
+            if (!token) {
+                showToast('请先设置 GitHub Token', 'warning', 2500);
+                closeUpload();
+                openSettings();
+                return;
+            }
+            if (isUploading) { showToast('已有上传进行中', 'warning'); return; }
+            const files = Array.from(fileList);
+            if (files.length > CONFIG.MAX_FILES) {
+                showToast(`一次最多 ${CONFIG.MAX_FILES} 个文件`, 'error', 3500);
+                return;
+            }
+            const accepted = [], oversized = [], unknown = [];
+            for (const f of files) {
+                if (f.size > CONFIG.MAX_FILE_SIZE) { oversized.push(f.name); continue; }
+                if (!isSupported(f.name)) unknown.push(f.name);
+                accepted.push(f);
+            }
+            if (unknown.length > 0) showToast(`未知类型：${unknown.slice(0,3).join(', ')}${unknown.length>3?'...':''}`, 'warning', 3000);
+            if (oversized.length > 0) showToast(`超过 100MB：${oversized.slice(0,3).join(', ')}`, 'error', 3500);
+            if (accepted.length === 0) return;
+            pendingFiles = accepted;
+            await startUpload();
+        }
+
+        async function startUpload() {
+            if (pendingFiles.length === 0 || isUploading) return;
+            isUploading = true;
+            const files = [...pendingFiles];
+            pendingFiles = [];
+            document.getElementById('uploadQueue').innerHTML = '';
+
+            const tasks = [];
+            const isTrimMode = (extractMode === 'trim-audio');
+            const currentFmt = outputFormat;
+
+            for (const file of files) {
+                const isVid = isVideo(file.name);
+                const newName = addTimestampToFilename(file.name);
+                const displayName = getDisplayName(newName);
+                const type = getFileType(file.name);
+
+                if (isTrimMode) {
+                    if (isVid) {
+                        tasks.push({ type: 'extract', file, filename: newName, displayName, isExtract: true, audioOnly: true, trimEnd: CONFIG.TRIM_SECONDS, format: currentFmt });
+                    } else {
+                        const newFile = new File([file], newName, { type: file.type || '' });
+                        tasks.push({ type, file: newFile, filename: newName, displayName, isExtract: false });
+                    }
+                    continue;
+                }
+                const extractTask = { type: 'extract', file, filename: newName, displayName, isExtract: true, audioOnly: false, format: 'wav' };
+                if (isVid && extractMode === 'audio-only') {
+                    extractTask.audioOnly = true;
+                    tasks.push(extractTask);
+                } else {
+                    const newFile = new File([file], newName, { type: file.type || '' });
+                    tasks.push({ type, file: newFile, filename: newName, displayName, isExtract: false });
+                    if (isVid && extractMode === 'both') tasks.push(extractTask);
+                }
+            }
+
+            for (const task of tasks) {
+                if (task.type === 'extract') {
+                    const fmt = task.format || 'wav';
+                    const audioName = task.filename.replace(/\.[^.]+$/, '.' + fmt);
+                    const label = task.trimEnd ? `✂️ ${getDisplayName(audioName)}（末尾-${task.trimEnd}s）` : `🎵 ${getDisplayName(audioName)}`;
+                    addQueueItem(task.filename, task.file.size, label, true);
+                } else {
+                    addQueueItem(task.filename, task.file.size, task.displayName, false);
+                }
+            }
+
+            const nameMap = {};
+            for (const f of galleryFiles) nameMap[f.name] = f.sha;
+
+            let successCount = 0, failCount = 0;
+            const failedMessages = [];
+
+            for (const task of tasks) {
+                if (task.type === 'extract') {
+                    const fmt = task.format || 'wav';
+                    const audioName = task.filename.replace(/\.[^.]+$/, '.' + fmt);
+                    updateQueueItem(task.filename, 'extracting', '提取中');
+                    try {
+                        const result = await extractAudioFromVideo(task.file, { trimEndSeconds: task.trimEnd || null, format: fmt });
+                        const audioFile = new File([result.blob], audioName, { type: fmt === 'mp3' ? 'audio/mpeg' : 'audio/wav' });
+                        const existingSha = nameMap[audioName] || null;
+                        await uploadBlobToGitHub(audioFile, audioName, existingSha);
+                        updateQueueItem(task.filename, 'success', '完成');
+                        successCount++;
+                        if (task.trimEnd) showToast(`✂️ 已提取并剪掉末尾 ${result.trimSeconds}s → ${fmt.toUpperCase()}`, 'success', 2500);
+                        else showToast(`🎵 已提取音频 → ${fmt.toUpperCase()}`, 'success', 2500);
+                    } catch (err) {
+                        updateQueueItem(task.filename, 'error', '失败');
+                        failedMessages.push(`${task.displayName}: ${friendlyExtractError(err)}`);
+                        failCount++;
+                    }
+                } else {
+                    const existingSha = nameMap[task.filename] || null;
+                    try {
+                        await uploadBlobToGitHub(task.file, task.filename, existingSha);
+                        updateQueueItem(task.filename, 'success', '完成');
+                        successCount++;
+                    } catch (err) {
+                        updateQueueItem(task.filename, 'error', '失败');
+                        failedMessages.push(`${task.displayName}: ${err.message}`);
+                        failCount++;
+                    }
+                }
+            }
+            isUploading = false;
+            if (successCount > 0) showToast(`上传完成：${successCount} 个成功${failCount > 0 ? `，${failCount} 个失败` : ''}`, failCount > 0 ? 'warning' : 'success', 3500);
+            else if (failCount > 0) showToast(`上传失败`, 'error', 3500);
+            if (failedMessages.length > 0) {
+                console.error('失败详情:', failedMessages);
+                // 手机只显示前 2 条
+                for (let i = 0; i < Math.min(failedMessages.length, 2); i++) {
+                    setTimeout(() => showToast('❌ ' + failedMessages[i], 'error', 5000), 400 + i * 600);
+                }
+            }
+            setTimeout(() => {
+                document.getElementById('uploadQueue').innerHTML = '';
+                closeUpload();
+                loadGallery();
+            }, 2000);
+        }
+
+        // ============ 图库加载 ============
+        async function loadGallery() {
+            const container = document.getElementById('galleryContainer');
+            if (!token) { renderGallery(); return; }
+            container.innerHTML = `<div class="loading"><span class="spinner"></span><span>加载中...</span></div>`;
+            try {
+                galleryFiles = await fetchGalleryFromGitHub();
+                const names = new Set(galleryFiles.map(f => f.name));
+                for (const n of Array.from(selectedFiles)) if (!names.has(n)) selectedFiles.delete(n);
+                for (const n of Array.from(syncingFiles)) if (!names.has(n)) syncingFiles.delete(n);
+                renderGallery();
+            } catch (err) {
+                console.error('[加载失败]', err);
+                container.innerHTML = `<div class="empty"><div class="icon">⚠️</div><div class="text">加载失败</div><div class="hint">${escapeHtml(err.message)}</div><button onclick="loadGallery()" style="margin-top:16px;padding:10px 20px;border:none;border-radius:10px;background:#7c3aed;color:#fff;font-family:inherit;font-size:0.85rem;font-weight:600;cursor:pointer;">重试</button></div>`;
+                showToast(err.message, 'error', 3000);
+            }
+        }
+
+        // ============ 网络状态监听 ============
+        function updateNetStatus() {
+            const tip = document.getElementById('netTip');
+            if (navigator.onLine) tip.classList.remove('show');
+            else tip.classList.add('show');
+        }
+        window.addEventListener('online', updateNetStatus);
+        window.addEventListener('offline', updateNetStatus);
+
+        // ============ 初始化 ============
+        function init() {
+            updateTokenStatus();
+            updateNetStatus();
+            // URL 参数中的 token
+            const params = new URLSearchParams(window.location.search);
+            const urlToken = params.get('token');
+            if (urlToken) {
+                token = urlToken;
+                localStorage.setItem('gh_token', token);
+                updateTokenStatus();
+                showToast('Token 已从 URL 获取', 'success');
+            }
+            if (token) loadGallery();
+            else renderGallery();
+
+            // 阻止 iOS 双击缩放（在卡片外的表单元素上还是允许）
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function (e) {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    // 允许 input 双击
+                    if (!e.target.closest('input, textarea, [contenteditable]')) {
+                        e.preventDefault();
+                    }
+                }
+                lastTouchEnd = now;
+            }, false);
+        }
+
+        init();
+    </script>
+</body>
+</html>
