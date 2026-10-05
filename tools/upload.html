@@ -8,9 +8,10 @@
 <style>
 :root {
   --primary-1: #7c3aed; --primary-2: #4f46e5;
-  --bg: #f5f6fa; --text: #1e293b; --text-light: #64748b;
-  --border: #e2e8f0; --success: #10b981; --danger: #ef4444;
-  --warning: #f59e0b; --shadow-sm: 0 2px 6px rgba(0,0,0,0.05);
+  --bg: #f5f6fa; --card-bg: #ffffff;
+  --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
+  --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+  --shadow-sm: 0 2px 6px rgba(0,0,0,0.05);
   --radius: 14px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-top: env(safe-area-inset-top, 0px);
@@ -19,7 +20,9 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   background: var(--bg); color: var(--text); line-height: 1.5;
-  -webkit-font-smoothing: antialiased; -webkit-overflow-scrolling: touch;
+  -webkit-font-smoothing: antialiased;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 .topbar {
   position: sticky; top: 0; z-index: 100;
@@ -32,9 +35,11 @@ body {
 .topbar .icon-btn {
   width:36px; height:36px; border-radius:50%;
   background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.22);
-  color:#fff; font-size:1rem; display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:1rem;
+  display:flex; align-items:center; justify-content:center;
   cursor:pointer; flex-shrink:0; padding:0;
 }
+.topbar .icon-btn:active { background:rgba(255,255,255,0.35); transform:scale(0.92); }
 .search-section {
   padding: 10px 14px 8px; background:#fff;
   border-bottom: 1px solid var(--border);
@@ -45,51 +50,107 @@ body {
   width:100%; padding:10px 36px 10px 38px;
   border: 2px solid var(--border); border-radius: 12px;
   font-size:16px; background:#f8fafc; outline:none;
-  color:var(--text); -webkit-appearance:none;
+  color:var(--text); font-family:inherit; -webkit-appearance:none;
 }
-.search-wrap .s-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-light); pointer-events:none; }
+.search-input:focus { border-color: #8b5cf6; background:#fff; box-shadow: 0 0 0 3px rgba(139,92,246,0.12); }
+.search-wrap .s-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:0.9rem; color:var(--text-light); pointer-events:none; }
 .search-wrap .s-clear {
   position:absolute; right:8px; top:50%; transform:translateY(-50%);
-  width:24px; height:24px; border-radius:50%; background:#e2e8f0;
-  border:none; color:var(--text-light); font-size:0.75rem;
-  display:none; align-items:center; justify-content:center;
+  width:24px; height:24px; border-radius:50%;
+  background:#e2e8f0; border:none; color:var(--text-light);
+  font-size:0.75rem; display:none; align-items:center; justify-content:center;
 }
 .search-wrap .s-clear.show { display:flex; }
-.filter-tabs { display:flex; gap:6px; margin-top:8px; overflow-x:auto; scrollbar-width:none; }
+.filter-tabs { display:flex; gap:6px; margin-top:8px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; }
 .filter-tabs::-webkit-scrollbar { display:none; }
 .filter-tab {
-  padding:5px 12px; border-radius:14px; border:1.5px solid var(--border);
-  background:#fff; font-size:0.75rem; font-weight:500; color:var(--text-light);
+  padding:5px 12px; border-radius:14px;
+  border:1.5px solid var(--border); background:#fff;
+  font-size:0.75rem; font-weight:500; color:var(--text-light);
   white-space:nowrap; cursor:pointer; flex-shrink:0; font-family:inherit;
 }
 .filter-tab.active { background: var(--primary-1); color:#fff; border-color:var(--primary-1); }
 .main { padding: 12px 12px 160px; }
 .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-@media (min-width: 640px) { .gallery-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 900px) { .gallery-grid { grid-template-columns: repeat(4, 1fr); } .main { max-width: 1400px; margin: 0 auto; } }
-.group-title { grid-column: 1 / -1; font-size:0.78rem; font-weight:600; color:var(--text-light); padding: 8px 4px 4px; display:flex; align-items:center; gap:8px; }
+@media (min-width: 640px) { .gallery-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; } }
+@media (min-width: 900px) { .gallery-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; } .main { max-width: 1400px; margin: 0 auto; padding: 20px 24px 160px; } }
+.group-title {
+  grid-column: 1 / -1; font-size:0.78rem; font-weight:600;
+  color:var(--text-light); padding: 8px 4px 4px;
+  display:flex; align-items:center; gap:8px;
+}
 .group-title .count { font-size:0.65rem; background:#eef2f7; padding:1px 8px; border-radius:8px; }
-.card { background: #fff; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); border: 2px solid transparent; transition: 0.2s; display:flex; flex-direction:column; position: relative; }
+.card {
+  background: var(--card-bg); border-radius: var(--radius);
+  overflow: hidden; box-shadow: var(--shadow-sm);
+  border: 2px solid transparent; transition: 0.2s;
+  display:flex; flex-direction:column; position: relative;
+  -webkit-user-select: none; user-select: none;
+}
 .card.selected { border-color: var(--success); box-shadow: 0 0 0 3px rgba(16,185,129,0.2); }
-.card .thumb { width:100%; aspect-ratio: 1 / 1; background: linear-gradient(135deg, #f8fafc, #eef2f7); display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; }
+.card .thumb {
+  width:100%; aspect-ratio: 1 / 1;
+  background: linear-gradient(135deg, #f8fafc, #eef2f7);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden; position:relative;
+}
 .card .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
 .card .thumb .placeholder { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:#94a3b8; font-size:2rem; width:100%; height:100%; }
 .card .thumb .placeholder span { font-size:0.65rem; color:var(--text-light); font-weight:600; letter-spacing:0.5px; }
-.card .thumb .type-badge { position:absolute; top:6px; left:6px; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); color:#fff; font-size:0.55rem; font-weight:700; padding:2px 6px; border-radius:8px; }
-.card .thumb .sync-badge { position:absolute; top:6px; right:6px; background: linear-gradient(135deg, #f59e0b, #ef4444); color:#fff; font-size:0.55rem; font-weight:700; padding:2px 6px; border-radius:8px; animation: pulse 1.5s infinite; }
+.card .thumb .type-badge {
+  position:absolute; top:6px; left:6px;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+  color:#fff; font-size:0.55rem; font-weight:700;
+  padding:2px 6px; border-radius:8px; letter-spacing:0.3px;
+}
+.card .thumb .sync-badge {
+  position:absolute; top:6px; right:6px;
+  background: linear-gradient(135deg, #f59e0b, #ef4444); color:#fff;
+  font-size:0.55rem; font-weight:700; padding:2px 6px; border-radius:8px;
+  animation: pulse 1.5s infinite;
+}
 @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
-.card .thumb .play-icon { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:2rem; color:rgba(255,255,255,0.9); text-shadow: 0 2px 12px rgba(0,0,0,0.6); pointer-events:none; z-index:2; }
-.card .thumb .checkbox { position:absolute; bottom:6px; right:6px; width:24px; height:24px; border-radius:7px; border:2px solid #fff; background: rgba(15,23,42,0.5); backdrop-filter: blur(6px); display:flex; align-items:center; justify-content:center; color:transparent; font-size:0.75rem; font-weight:700; z-index:3; }
+.card .thumb .play-icon {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  font-size:2rem; color:rgba(255,255,255,0.9);
+  text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+  pointer-events:none; z-index:2;
+}
+.card .thumb .checkbox {
+  position:absolute; bottom:6px; right:6px;
+  width:24px; height:24px; border-radius:7px;
+  border:2px solid #fff; background: rgba(15,23,42,0.5);
+  backdrop-filter: blur(6px);
+  display:flex; align-items:center; justify-content:center;
+  color:transparent; font-size:0.75rem; font-weight:700;
+  z-index:3;
+}
 .card.selected .thumb .checkbox { background: linear-gradient(135deg, #10b981, #059669); color:#fff; }
 .card .info { padding: 8px 10px 4px; }
-.card .name { font-size:0.78rem; font-weight:600; line-height:1.35; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; word-break:break-all; margin-bottom:3px; }
+.card .name {
+  font-size:0.78rem; font-weight:600; line-height:1.35;
+  overflow:hidden; text-overflow:ellipsis;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  word-break:break-all; margin-bottom:3px;
+}
 .card .meta { font-size:0.65rem; color:var(--text-light); display:flex; gap:6px; align-items:center; }
+.card .meta .time { background: rgba(124,58,237,0.08); color:var(--primary-1); padding:1px 6px; border-radius:6px; font-weight:500; }
 .card .audio-player { padding: 6px 8px 4px; }
 .card .audio-player audio { width:100%; height: 40px; border-radius: 8px; outline:none; background:#f1f5f9; }
 .card .video-player { padding: 6px 8px 4px; }
 .card .video-player video { width:100%; border-radius:8px; outline:none; background:#000; display:block; aspect-ratio: 16 / 9; }
-.card .actions { display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; padding: 4px 8px 8px; }
-.card .actions .btn { display:flex; align-items:center; justify-content:center; gap:2px; padding: 7px 2px; border-radius:7px; font-size:0.68rem; font-weight:600; border: 1.5px solid var(--border); background:#f8fafc; color:var(--text-light); cursor:pointer; font-family: inherit; white-space:nowrap; overflow:hidden; }
+.card .actions {
+  display:grid; grid-template-columns: repeat(3, 1fr);
+  gap:4px; padding: 4px 8px 8px;
+}
+.card .actions .btn {
+  display:flex; align-items:center; justify-content:center; gap:2px;
+  padding: 7px 2px; border-radius:7px;
+  font-size:0.68rem; font-weight:600;
+  border: 1.5px solid var(--border); background:#f8fafc;
+  color:var(--text-light); cursor:pointer;
+  font-family: inherit; white-space:nowrap; overflow:hidden;
+}
 .card .actions .btn:active { transform: scale(0.94); }
 .card .actions .btn.primary { background: #eff6ff; color:#2563eb; border-color:#bfdbfe; }
 .card .actions .btn.green { background: #f0fdf4; color:#16a34a; border-color:#bbf7d0; }
@@ -100,108 +161,275 @@ body {
 .empty .icon { font-size: 3rem; margin-bottom: 10px; opacity: 0.5; }
 .empty .text { font-size: 0.95rem; font-weight: 500; }
 .empty .hint { font-size: 0.78rem; margin-top:6px; opacity: 0.7; }
-.fab { position: fixed; right: 16px; bottom: calc(16px + var(--safe-bottom)); width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-1), var(--primary-2)); color: #fff; font-size: 1.7rem; border: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(124,58,237,0.45); cursor: pointer; z-index: 90; }
-.fab.alt { bottom: calc(84px + var(--safe-bottom)); background: linear-gradient(135deg, #10b981, #059669); font-size: 1.3rem; }
-.fab.alt2 { bottom: calc(152px + var(--safe-bottom)); background: linear-gradient(135deg, #f59e0b, #f97316); font-size: 1.3rem; }
-.sheet-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.5); backdrop-filter: blur(4px); z-index: 200; opacity:0; pointer-events:none; transition: opacity 0.25s; }
+.fab {
+  position: fixed; right: 16px; bottom: calc(16px + var(--safe-bottom));
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: #fff; font-size: 1.7rem; border: none;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 24px rgba(124,58,237,0.45);
+  cursor: pointer; z-index: 90; transition: 0.2s;
+}
+.fab:active { transform: scale(0.9); }
+.fab.alt {
+  bottom: calc(84px + var(--safe-bottom));
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 8px 24px rgba(16,185,129,0.45);
+  font-size: 1.3rem;
+}
+.fab.alt2 {
+  bottom: calc(152px + var(--safe-bottom));
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+  box-shadow: 0 8px 24px rgba(245,158,11,0.45);
+  font-size: 1.3rem;
+}
+.sheet-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,0.5); backdrop-filter: blur(4px);
+  z-index: 200; opacity:0; pointer-events:none; transition: opacity 0.25s;
+}
 .sheet-backdrop.show { opacity:1; pointer-events:auto; }
-.sheet { position: fixed; left:0; right:0; bottom:0; background: #fff; border-radius: 20px 20px 0 0; z-index: 201; max-height: 95vh; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding-bottom: var(--safe-bottom); overflow: hidden; }
+.sheet {
+  position: fixed; left:0; right:0; bottom:0;
+  background: #fff; border-radius: 20px 20px 0 0;
+  z-index: 201; max-height: 95vh;
+  display: flex; flex-direction: column;
+  transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-bottom: var(--safe-bottom); overflow: hidden;
+}
 .sheet.show { transform: translateY(0); }
-.sheet-handle { width:40px; height:4px; background:#cbd5e1; border-radius:2px; margin: 10px auto 6px; }
-.sheet-header { padding: 6px 20px 14px; border-bottom: 1px solid var(--border); }
-.sheet-header h3 { font-size:1rem; font-weight:700; }
+.sheet-handle { width:40px; height:4px; background:#cbd5e1; border-radius:2px; margin: 10px auto 6px; flex-shrink:0; }
+.sheet-header { padding: 6px 20px 14px; border-bottom: 1px solid var(--border); flex-shrink:0; }
+.sheet-header h3 { font-size:1rem; font-weight:700; word-break:break-all; line-height:1.3; }
 .sheet-header .sub { font-size:0.72rem; color:var(--text-light); margin-top:4px; }
 .sheet-body { padding: 12px 0 4px; overflow-y:auto; -webkit-overflow-scrolling: touch; }
-.sheet-cancel { padding: 14px 20px calc(14px + var(--safe-bottom)); border-top: 8px solid #f1f5f9; text-align: center; font-weight: 600; color: var(--text-light); background: #fff; cursor: pointer; }
+.sheet-cancel {
+  padding: 14px 20px calc(14px + var(--safe-bottom));
+  border-top: 8px solid #f1f5f9;
+  text-align: center; font-weight: 600;
+  color: var(--text-light); background: #fff;
+  cursor: pointer; flex-shrink: 0;
+}
+.sheet-cancel:active { background: #f1f5f9; }
 .mode-choices { padding: 8px 16px 12px; display: flex; flex-direction: column; gap: 8px; }
-.mode-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border: 2px solid var(--border); border-radius: 12px; background:#fff; cursor:pointer; }
-.mode-item.active { border-color: var(--primary-1); background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(79,70,229,0.08)); }
-.mode-item .m-radio { width:18px; height:18px; border-radius:50%; border:2.5px solid #cbd5e1; flex-shrink:0; margin-top:2px; background:#fff; position:relative; }
-.mode-item.active .m-radio { border-color: var(--primary-1); background: var(--primary-1); }
+.mode-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 14px; border: 2px solid var(--border);
+  border-radius: 12px; background:#fff; cursor:pointer;
+}
+.mode-item.active { border-color: #7c3aed; background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(79,70,229,0.08)); }
+.mode-item .m-radio {
+  width:18px; height:18px; border-radius:50%; border:2.5px solid #cbd5e1;
+  flex-shrink:0; margin-top:2px; background:#fff; position:relative;
+}
+.mode-item.active .m-radio { border-color: #7c3aed; background: #7c3aed; }
 .mode-item.active .m-radio::after { content:''; position:absolute; inset:4px; background:#fff; border-radius:50%; }
 .mode-item .m-title { font-size:0.88rem; font-weight:600; }
-.mode-item .m-desc { font-size:0.7rem; color:var(--text-light); margin-top:2px; }
+.mode-item .m-desc { font-size:0.7rem; color:var(--text-light); margin-top:2px; line-height:1.4; }
 .badge-new { background: linear-gradient(135deg, #f59e0b, #ef4444); color:#fff; font-size:0.55rem; padding:1px 6px; border-radius:8px; font-weight:700; }
 .format-row { padding: 0 16px 12px; display:none; }
 .format-row.show { display: block; }
 .format-row .label { font-size:0.78rem; font-weight:600; margin-bottom:6px; }
 .format-btns { display:flex; gap:8px; }
-.format-btn { flex:1; padding:10px; border:2px solid var(--border); border-radius:10px; background:#fff; font-size:0.8rem; font-weight:600; color:var(--text-light); font-family:inherit; }
+.format-btn {
+  flex:1; padding:10px; border:2px solid var(--border); border-radius:10px;
+  background:#fff; font-size:0.8rem; font-weight:600; color:var(--text-light);
+  font-family:inherit; cursor:pointer;
+}
 .format-btn.active { background: linear-gradient(135deg, #f59e0b, #f97316); color:#fff; border-color:#f59e0b; }
-.upload-btn-full { margin: 0 16px 16px; padding: 14px; border:none; border-radius:12px; background: linear-gradient(135deg, var(--primary-1), var(--primary-2)); color:#fff; font-size:1rem; font-weight:700; font-family:inherit; box-shadow: 0 6px 18px rgba(124,58,237,0.35); cursor: pointer; width: calc(100% - 32px); }
+.upload-btn-full {
+  margin: 0 16px 16px;
+  padding: 14px; border:none; border-radius:12px;
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color:#fff; font-size:1rem; font-weight:700; font-family:inherit;
+  box-shadow: 0 6px 18px rgba(124,58,237,0.35);
+  cursor: pointer; width: calc(100% - 32px);
+}
+.upload-btn-full:active { transform: scale(0.98); }
 .queue { padding: 0 16px; display:flex; flex-direction:column; gap:8px; max-height: 220px; overflow-y:auto; margin-bottom: 8px; }
-.queue-item { display:flex; align-items:center; gap:8px; padding: 8px 10px; background:#f8fafc; border-radius:10px; border:1px solid var(--border); font-size:0.78rem; }
+.queue-item {
+  display:flex; align-items:center; gap:8px;
+  padding: 8px 10px; background:#f8fafc;
+  border-radius:10px; border:1px solid var(--border);
+  font-size:0.78rem;
+}
 .queue-item .q-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500; }
 .queue-item .q-bar { width:50px; height:5px; background:#e2e8f0; border-radius:3px; overflow:hidden; flex-shrink:0; }
-.queue-item .q-fill { height:100%; width:0%; background: linear-gradient(90deg, var(--primary-1), #8b5cf6); transition: width 0.25s; }
-.queue-item .q-fill.success { background: var(--success); }
-.queue-item .q-fill.error { background: var(--danger); }
+.queue-item .q-fill { height:100%; width:0%; background: linear-gradient(90deg, #7c3aed, #8b5cf6); transition: width 0.25s; }
+.queue-item .q-fill.success { background: #10b981; }
+.queue-item .q-fill.error { background: #ef4444; }
 .queue-item .q-fill.extracting { background: linear-gradient(90deg, #f59e0b, #fbbf24); animation: extractingPulse 1.2s infinite; }
 @keyframes extractingPulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
 .queue-item .q-status { font-size:0.68rem; font-weight:600; min-width:36px; text-align:right; color:var(--text-light); }
-.q-status.success { color: var(--success); }
-.q-status.error { color: var(--danger); }
+.q-status.success { color: #10b981; }
+.q-status.error { color: #ef4444; }
 .settings-body { padding: 16px 20px calc(20px + var(--safe-bottom)); }
 .settings-body .field { margin-bottom: 14px; }
 .settings-body .field label { display:block; font-size:0.82rem; font-weight:600; margin-bottom:6px; }
-.settings-body .field input { width:100%; padding:12px 14px; border:2px solid var(--border); border-radius:10px; font-size:16px; font-family:'SF Mono', monospace; outline:none; background:#fafbfc; -webkit-appearance:none; }
+.settings-body .field input {
+  width:100%; padding:12px 14px; border:2px solid var(--border); border-radius:10px;
+  font-size:16px; font-family:'SF Mono', monospace;
+  outline:none; background:#fafbfc; -webkit-appearance:none;
+}
+.settings-body .field input:focus { border-color: #8b5cf6; background:#fff; box-shadow: 0 0 0 4px rgba(139,92,246,0.12); }
 .settings-body .row { display:flex; gap:10px; }
-.settings-body .row button { flex:1; padding:12px; border:none; border-radius:10px; font-size:0.9rem; font-weight:600; font-family:inherit; cursor:pointer; }
-.settings-body .row .save { background: linear-gradient(135deg, var(--primary-1), var(--primary-2)); color:#fff; }
+.settings-body .row button {
+  flex:1; padding:12px; border:none; border-radius:10px;
+  font-size:0.9rem; font-weight:600; font-family:inherit; cursor:pointer;
+}
+.settings-body .row .save { background: linear-gradient(135deg, #7c3aed, #4f46e5); color:#fff; box-shadow: 0 4px 12px rgba(124,58,237,0.35); }
 .settings-body .row .clear { background:#f1f5f9; color:var(--text-light); }
 .settings-body .row .danger { background:#fef2f2; color:#dc2626; }
 .status-line { font-size:0.78rem; color:var(--text-light); margin-top:8px; display:flex; align-items:center; gap:6px; }
 .dot { width:8px; height:8px; border-radius:50%; background:#cbd5e1; }
-.dot.active { background: var(--success); }
+.dot.active { background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.5); }
 .restore-body { padding: 16px 20px calc(20px + var(--safe-bottom)); }
 .restore-body .field { margin-bottom: 12px; }
 .restore-body .field label { display:block; font-size:0.82rem; font-weight:600; margin-bottom:6px; }
-.restore-body .field input { width:100%; padding:12px 14px; border:2px solid var(--border); border-radius:10px; font-size:14px; font-family:'SF Mono', monospace; outline:none; background:#fafbfc; -webkit-appearance:none; }
-.restore-btn { width:100%; padding:14px; border:none; border-radius:12px; background: linear-gradient(135deg, #10b981, #059669); color:#fff; font-size:0.95rem; font-weight:700; font-family:inherit; cursor:pointer; margin-bottom: 14px; }
-.restore-preview { background:#0f0f1a; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 200px; padding: 12px; }
+.restore-body .field input {
+  width:100%; padding:12px 14px; border:2px solid var(--border); border-radius:10px;
+  font-size:14px; font-family:'SF Mono', monospace;
+  outline:none; background:#fafbfc; -webkit-appearance:none;
+}
+.restore-body .field input:focus { border-color: #8b5cf6; background:#fff; box-shadow: 0 0 0 4px rgba(139,92,246,0.12); }
+.restore-btn {
+  width:100%; padding:14px; border:none; border-radius:12px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color:#fff; font-size:0.95rem; font-weight:700; font-family:inherit;
+  box-shadow: 0 6px 18px rgba(16,185,129,0.35); cursor:pointer; margin-bottom: 14px;
+}
+.restore-preview {
+  background:#0f0f1a; border-radius: 12px; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 200px; padding: 12px;
+}
 .restore-preview img, .restore-preview video { max-width: 100%; max-height: 60vh; display: block; }
 .restore-preview audio { width: 100%; }
 .restore-preview .hint-text { color:#94a3b8; font-size:0.85rem; text-align:center; padding: 40px 20px; }
 .restore-actions { display: flex; gap: 8px; margin-top: 12px; }
-.restore-actions button { flex: 1; padding: 10px; border-radius: 10px; border: 2px solid var(--border); background: #fff; font-size: 0.82rem; font-weight: 600; font-family: inherit; color: var(--text); cursor: pointer; }
-.editor-tabs { display: flex; gap: 4px; padding: 10px 14px 8px; background:#fff; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.restore-actions button {
+  flex: 1; padding: 10px; border-radius: 10px;
+  border: 2px solid var(--border); background: #fff;
+  font-size: 0.82rem; font-weight: 600; font-family: inherit;
+  color: var(--text); cursor: pointer;
+}
+.editor-tabs {
+  display: flex; gap: 4px; padding: 10px 14px 8px; background:#fff;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+  overflow-x: auto; scrollbar-width: none;
+}
 .editor-tabs::-webkit-scrollbar { display: none; }
-.editor-tab { padding: 8px 14px; border-radius: 10px; border: 2px solid var(--border); background:#fff; font-size: 0.82rem; font-weight: 600; color: var(--text-light); font-family: inherit; cursor: pointer; white-space: nowrap; }
-.editor-tab.active { background: linear-gradient(135deg, var(--primary-1), var(--primary-2)); color:#fff; border-color: var(--primary-1); }
-.editor-content { padding: 12px 14px 20px; }
-.editor-drop { border: 2.5px dashed #c4b5fd; border-radius: 12px; padding: 30px 16px; text-align: center; cursor: pointer; background: linear-gradient(135deg, rgba(124,58,237,0.03), rgba(79,70,229,0.03)); margin-bottom: 12px; }
+.editor-tab {
+  padding: 8px 14px; border-radius: 10px;
+  border: 2px solid var(--border); background:#fff;
+  font-size: 0.82rem; font-weight: 600; color: var(--text-light);
+  font-family: inherit; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+}
+.editor-tab.active { background: linear-gradient(135deg, #7c3aed, #4f46e5); color:#fff; border-color: #7c3aed; }
+.editor-content {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 12px 14px 20px;
+}
+.editor-drop {
+  border: 2.5px dashed #c4b5fd; border-radius: 12px;
+  padding: 30px 16px; text-align: center;
+  cursor: pointer; background: linear-gradient(135deg, rgba(124,58,237,0.03), rgba(79,70,229,0.03));
+  margin-bottom: 12px;
+}
 .editor-drop .icon { font-size: 2.4rem; display: block; margin-bottom: 8px; }
-.editor-drop .text { font-size: 0.9rem; font-weight: 600; }
+.editor-drop .text { font-size: 0.9rem; font-weight: 600; color: var(--text); }
 .editor-drop .hint { font-size: 0.72rem; color: var(--text-light); margin-top: 4px; }
-.canvas-wrap { position: relative; background: #1a1a2e; border-radius: 12px; display: flex; align-items: center; justify-content: center; min-height: 260px; overflow: hidden; margin-bottom: 12px; touch-action: none; }
-.canvas-wrap canvas { max-width: 100%; max-height: 60vh; display: block; touch-action: none; }
-.tools-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-.tool-btn { padding: 8px 14px; border-radius: 10px; border: 2px solid var(--border); background: #fff; font-size: 0.78rem; font-weight: 600; color: var(--text-light); font-family: inherit; cursor: pointer; }
-.tool-btn.active { background: linear-gradient(135deg, var(--primary-1), var(--primary-2)); color: #fff; border-color: var(--primary-1); }
+.canvas-wrap {
+  position: relative; background: #1a1a2e; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 260px; overflow: hidden; margin-bottom: 12px;
+  touch-action: none;
+}
+.canvas-wrap canvas {
+  max-width: 100%; max-height: 60vh; display: block;
+  touch-action: none;
+}
+.tools-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+.tool-btn {
+  padding: 8px 14px; border-radius: 10px;
+  border: 2px solid var(--border); background: #fff;
+  font-size: 0.78rem; font-weight: 600; color: var(--text-light);
+  font-family: inherit; cursor: pointer;
+  display: flex; align-items: center; gap: 4px;
+}
+.tool-btn.active { background: linear-gradient(135deg, #7c3aed, #4f46e5); color: #fff; border-color: #7c3aed; }
+.tool-btn:active { transform: scale(0.96); }
 .param-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.8rem; }
 .param-row label { min-width: 70px; color: var(--text-light); font-weight: 500; }
-.param-row input[type="range"] { flex: 1; accent-color: var(--primary-1); }
-.param-row .val { min-width: 40px; text-align: right; font-weight: 600; color: var(--primary-1); }
+.param-row input[type="range"] { flex: 1; accent-color: #7c3aed; }
+.param-row .val { min-width: 40px; text-align: right; font-weight: 600; color: #7c3aed; }
+.param-row select {
+  flex:1; padding:6px 10px; border:1.5px solid var(--border);
+  border-radius:6px; font-size:0.8rem; outline:none; background:#fff; font-family:inherit;
+}
 .filter-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
-.filter-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px; border-radius: 10px; border: 2px solid var(--border); background: #fff; cursor: pointer; }
-.filter-item.active { border-color: var(--primary-1); background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(79,70,229,0.08)); }
-.filter-item .f-preview { width: 100%; aspect-ratio: 1; border-radius: 8px; background: #f1f5f9; overflow: hidden; }
+.filter-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 6px; border-radius: 10px;
+  border: 2px solid var(--border); background: #fff;
+  cursor: pointer;
+}
+.filter-item.active { border-color: #7c3aed; background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(79,70,229,0.08)); }
+.filter-item .f-preview { width: 100%; aspect-ratio: 1; border-radius: 8px; background: #f1f5f9; overflow: hidden; display: block; }
 .filter-item .f-preview img { width: 100%; height: 100%; object-fit: cover; }
 .filter-item .f-name { font-size: 0.68rem; font-weight: 600; color: var(--text-light); }
 .layout-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-.layout-item { padding: 10px 6px; border-radius: 10px; border: 2px solid var(--border); background: #fff; cursor: pointer; text-align: center; }
-.layout-item.active { border-color: var(--primary-1); background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(79,70,229,0.08)); }
+.layout-item {
+  padding: 10px 6px; border-radius: 10px;
+  border: 2px solid var(--border); background: #fff;
+  cursor: pointer; text-align: center;
+}
+.layout-item.active { border-color: #7c3aed; background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(79,70,229,0.08)); }
 .layout-item .l-icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
 .layout-item .l-name { font-size: 0.68rem; font-weight: 600; color: var(--text-light); }
 .editor-actions { display: flex; gap: 8px; margin-top: 12px; }
-.editor-actions button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 0.9rem; font-weight: 700; font-family: inherit; cursor: pointer; }
-.editor-actions .primary { background: linear-gradient(135deg, var(--primary-1), var(--primary-2)); color: #fff; box-shadow: 0 4px 12px rgba(124,58,237,0.35); }
+.editor-actions button {
+  flex: 1; padding: 12px; border-radius: 10px; border: none;
+  font-size: 0.9rem; font-weight: 700; font-family: inherit;
+  cursor: pointer;
+}
+.editor-actions .primary { background: linear-gradient(135deg, #7c3aed, #4f46e5); color: #fff; box-shadow: 0 4px 12px rgba(124,58,237,0.35); }
 .editor-actions .green { background: linear-gradient(135deg, #10b981, #059669); color: #fff; box-shadow: 0 4px 12px rgba(16,185,129,0.35); }
 .editor-actions .gray { background: #f1f5f9; color: var(--text-light); }
-.editor-tip { font-size: 0.72rem; color: var(--text-light); padding: 8px 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; margin-bottom: 10px; line-height: 1.5; }
+.editor-actions .red { background: #fef2f2; color: #dc2626; }
+.editor-tip {
+  font-size: 0.72rem; color: var(--text-light);
+  padding: 8px 12px; background: #fffbeb;
+  border: 1px solid #fde68a; border-radius: 8px;
+  margin-bottom: 10px; line-height: 1.5;
+}
 .editor-tip b { color: #b45309; }
-.toast-container { position: fixed; top: calc(16px + var(--safe-top)); left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; max-width: calc(100vw - 40px); align-items: center; }
-.toast { padding: 10px 16px; border-radius: 10px; color:#fff; font-size:0.82rem; font-weight:500; box-shadow: 0 8px 24px rgba(0,0,0,0.2); animation: toastIn 0.25s ease-out forwards; max-width: 100%; word-break: break-word; line-height: 1.4; text-align: center; }
+.engine-status {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: 8px;
+  font-size: 0.78rem; font-weight: 600;
+  margin-bottom: 10px;
+  background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;
+}
+.engine-status.working { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+.engine-status .spinner-sm {
+  width: 12px; height: 12px; border: 2px solid currentColor;
+  border-top-color: transparent; border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.toast-container {
+  position: fixed; top: calc(16px + var(--safe-top)); left: 50%; transform: translateX(-50%);
+  z-index: 9999; display: flex; flex-direction: column; gap: 8px;
+  pointer-events: none; max-width: calc(100vw - 40px); align-items: center;
+}
+.toast {
+  padding: 10px 16px; border-radius: 10px;
+  color:#fff; font-size:0.82rem; font-weight:500;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  animation: toastIn 0.25s ease-out forwards;
+  max-width: 100%; word-break: break-word; line-height: 1.4; text-align: center;
+}
 .toast-success { background: rgba(16,185,129,0.95); }
 .toast-error { background: rgba(239,68,68,0.95); }
 .toast-warning { background: rgba(245,158,11,0.95); }
@@ -210,38 +438,108 @@ body {
 @keyframes toastIn { from { opacity:0; transform:translateY(-20px) scale(0.95); } to { opacity:1; transform:translateY(0) scale(1); } }
 @keyframes toastOut { to { opacity:0; transform:translateY(-20px) scale(0.95); } }
 .loading { display:flex; align-items:center; justify-content:center; gap:10px; padding:60px 20px; color:var(--text-light); }
-.spinner { width:22px; height:22px; border:3px solid #e2e8f0; border-top-color: var(--primary-1); border-radius:50%; animation: spin 0.7s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+.spinner { width:22px; height:22px; border:3px solid #e2e8f0; border-top-color: #7c3aed; border-radius:50%; animation: spin 0.7s linear infinite; }
 .hidden-input { position:absolute; left:-9999px; width:0; height:0; opacity:0; }
-.select-bar { display: none; padding: 8px 14px; background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.06)); border-bottom: 1px solid rgba(16,185,129,0.25); align-items: center; gap: 8px; }
+.select-bar {
+  display: none; padding: 8px 14px;
+  background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.06));
+  border-bottom: 1px solid rgba(16,185,129,0.25);
+  align-items: center; gap: 8px;
+}
 .select-bar.show { display: flex; }
 .select-bar .info { flex:1; font-size:0.82rem; font-weight:600; color:#047857; }
-.select-bar button { padding: 6px 10px; border-radius: 8px; border: 1.5px solid rgba(16,185,129,0.35); background: #fff; color:#047857; font-size:0.72rem; font-weight:600; font-family:inherit; cursor:pointer; }
+.select-bar button {
+  padding: 6px 10px; border-radius: 8px;
+  border: 1.5px solid rgba(16,185,129,0.35);
+  background: #fff; color:#047857;
+  font-size:0.72rem; font-weight:600; font-family:inherit;
+  cursor:pointer;
+}
 .select-bar button.primary { background: linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; }
-.lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 500; display:none; align-items: center; justify-content: center; padding: 20px; }
+.lightbox {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+  z-index: 500; display:none;
+  align-items: center; justify-content: center; padding: 20px;
+}
 .lightbox.show { display: flex; }
 .lightbox img { max-width: 100%; max-height: 100%; display: block; }
-.lightbox .lb-close { position: absolute; top: calc(16px + var(--safe-top)); right: 16px; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.15); border:none; color: #fff; font-size: 1.2rem; }
-.lightbox .lb-actions { position: absolute; bottom: calc(20px + var(--safe-bottom)); left: 20px; right: 20px; display: flex; gap: 10px; }
-.lightbox .lb-actions button { flex: 1; padding: 12px; border-radius: 10px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #fff; font-size: 0.85rem; font-weight: 600; font-family: inherit; }
+.lightbox .lb-close {
+  position: absolute; top: calc(16px + var(--safe-top)); right: 16px;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); border:none;
+  color: #fff; font-size: 1.2rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.lightbox .lb-actions {
+  position: absolute; bottom: calc(20px + var(--safe-bottom));
+  left: 20px; right: 20px; display: flex; gap: 10px;
+}
+.lightbox .lb-actions button {
+  flex: 1; padding: 12px; border-radius: 10px;
+  background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.25); color: #fff;
+  font-size: 0.85rem; font-weight: 600; font-family: inherit;
+  cursor: pointer;
+}
 .puzzle-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
-.puzzle-item { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 2px solid var(--border); background: #f1f5f9; }
+.puzzle-item {
+  position: relative; aspect-ratio: 1;
+  border-radius: 8px; overflow: hidden;
+  border: 2px solid var(--border); background: #f1f5f9;
+}
 .puzzle-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.puzzle-item .p-del { position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; border-radius: 50%; background: rgba(239,68,68,0.9); border: none; color: #fff; font-size: 0.6rem; cursor: pointer; }
-.puzzle-item .p-num { position: absolute; bottom: 2px; left: 2px; background: rgba(124,58,237,0.9); color: #fff; font-size: 0.55rem; font-weight: 700; padding: 0 4px; border-radius: 6px; }
-/* 水印面板 */
-.watermark-panel { display: none; padding: 12px; background: #f8fafc; border: 2px solid var(--border); border-radius: 10px; margin-bottom: 12px; }
-.watermark-panel.show { display: block; }
-.wm-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 0.78rem; }
-.wm-row label { min-width: 55px; color: var(--text-light); font-weight: 500; }
-.wm-row input[type="text"] { flex: 1; padding: 6px 10px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 0.8rem; outline: none; background: #fff; font-family: inherit; }
-.wm-row input[type="color"] { width: 42px; height: 30px; padding: 2px; border: 1.5px solid var(--border); border-radius: 6px; cursor: pointer; background: #fff; }
-.wm-row select { flex: 1; padding: 6px 10px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 0.8rem; outline: none; background: #fff; font-family: inherit; }
-.wm-row input[type="range"] { flex: 1; accent-color: var(--primary-1); }
-/* 画质 */
+.puzzle-item .p-del {
+  position: absolute; top: 2px; right: 2px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(239,68,68,0.9); border: none;
+  color: #fff; font-size: 0.6rem; line-height: 1;
+  cursor: pointer;
+}
+.puzzle-item .p-num {
+  position: absolute; bottom: 2px; left: 2px;
+  background: rgba(124,58,237,0.9); color: #fff;
+  font-size: 0.55rem; font-weight: 700;
+  padding: 0 4px; border-radius: 6px;
+}
+.magic-hint {
+  position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.7); color: #fff;
+  font-size: 0.72rem; padding: 4px 10px; border-radius: 12px;
+  pointer-events: none; opacity: 0; transition: opacity 0.3s;
+  z-index: 5;
+}
+.magic-hint.show { opacity: 1; }
 .quality-row { display: flex; gap: 8px; margin-bottom: 12px; }
-.quality-btn { flex: 1; padding: 8px; border: 2px solid var(--border); border-radius: 10px; background: #fff; font-size: 0.72rem; font-weight: 600; color: var(--text-light); font-family: inherit; cursor: pointer; line-height: 1.2; }
+.quality-btn {
+  flex: 1; padding: 8px;
+  border: 2px solid var(--border); border-radius: 10px;
+  background: #fff; font-size: 0.75rem; font-weight: 600;
+  color: var(--text-light); font-family: inherit; cursor: pointer;
+}
 .quality-btn.active { background: linear-gradient(135deg, #10b981, #059669); color: #fff; border-color: #10b981; }
+.quality-btn small { font-size:0.6rem; opacity:0.85; }
+.watermark-panel {
+  display: none; padding: 12px;
+  background: #f8fafc; border: 2px solid var(--border);
+  border-radius: 10px; margin-bottom: 12px;
+}
+.watermark-panel.show { display: block; }
+.watermark-panel .wm-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 0.78rem; }
+.watermark-panel .wm-row label { min-width: 60px; color: var(--text-light); font-weight: 500; }
+.watermark-panel .wm-row input[type="text"] {
+  flex: 1; padding: 6px 10px; border: 1.5px solid var(--border);
+  border-radius: 6px; font-size: 0.8rem; outline: none; background: #fff; font-family: inherit;
+}
+.watermark-panel .wm-row input[type="color"] {
+  width: 42px; height: 30px; padding: 2px;
+  border: 1.5px solid var(--border); border-radius: 6px;
+  cursor: pointer; background: #fff;
+}
+.watermark-panel .wm-row select {
+  flex: 1; padding: 6px 10px; border: 1.5px solid var(--border);
+  border-radius: 6px; font-size: 0.8rem; outline: none; background: #fff; font-family: inherit;
+}
+.watermark-panel .wm-row input[type="range"] { flex: 1; accent-color: #7c3aed; }
 </style>
 </head>
 <body>
@@ -311,68 +609,89 @@ body {
 <div class="sheet-backdrop" id="editorBackdrop" onclick="closeSheet('editor')"></div>
 <div class="sheet" id="editorSheet" style="max-height: 98vh;">
   <div class="sheet-handle"></div>
-  <div class="sheet-header"><h3>✏️ 图片编辑器</h3><div class="sub">智能消除 · 本地处理 · 免会员</div></div>
+  <div class="sheet-header">
+    <h3>✏️ 图片编辑器</h3>
+    <div class="sub">智能消除 · 本地处理 · 免会员</div>
+  </div>
   <div class="editor-tabs">
     <button class="editor-tab active" data-etab="single" onclick="switchEditorTab('single')">🎨 单图编辑</button>
     <button class="editor-tab" data-etab="puzzle" onclick="switchEditorTab('puzzle')">🧩 拼图</button>
   </div>
   <div class="editor-content">
     <div id="editorSingle">
-      <div class="editor-drop" onclick="document.getElementById('editorImgInput').click()">
+      <div class="editor-drop" id="editorImgDrop" onclick="document.getElementById('editorImgInput').click()">
         <span class="icon">🖼️</span>
         <div class="text">点击选择要编辑的图片</div>
         <div class="hint">支持 JPG / PNG / WebP 等</div>
       </div>
       <input type="file" id="editorImgInput" accept="image/*" hidden>
+
       <div class="canvas-wrap" id="editorCanvasWrap" style="display:none;">
         <canvas id="editorCanvas"></canvas>
+        <div class="magic-hint" id="magicHint">👆 点击相似区域自动选中</div>
       </div>
+
       <div id="editorTools" style="display:none;">
         <div class="editor-tip">
-          💡 <b>消除水印</b>：涂抹要消除的区域 → 点「✨ 智能消除」，程序会融合周围像素自然填充。
+          💡 <b>两种消除方式</b>：<br>
+          ✨ <b>智能消除</b>：涂抹 → 点按钮，多尺度填充贴合原图<br>
+          🪄 <b>魔法棒</b>：点一下自动选中相似色块（适合纯色水印）
         </div>
         <div class="tools-row">
           <button class="tool-btn active" data-tool="brush" onclick="setBrushTool('brush')">🖌️ 涂抹</button>
+          <button class="tool-btn" data-tool="magic" onclick="setBrushTool('magic')">🪄 魔法棒</button>
           <button class="tool-btn" onclick="undoStroke()">↩️ 撤销</button>
           <button class="tool-btn" onclick="clearMask()">🗑️ 清空</button>
         </div>
-        <div class="param-row">
+        <div class="param-row" id="brushRow">
           <label>画笔大小</label>
           <input type="range" id="brushSize" min="5" max="80" value="30" oninput="document.getElementById('brushSizeVal').textContent = this.value + 'px'">
           <span class="val" id="brushSizeVal">30px</span>
         </div>
+        <div class="param-row" id="magicRow" style="display:none;">
+          <label>容差</label>
+          <input type="range" id="magicTol" min="10" max="120" value="40" oninput="document.getElementById('magicTolVal').textContent = this.value">
+          <span class="val" id="magicTolVal">40</span>
+        </div>
         <div class="param-row">
-          <label>修复强度</label>
-          <input type="range" id="inpaintStrength" min="1" max="5" value="3" oninput="document.getElementById('inpaintStrengthVal').textContent = this.value">
-          <span class="val" id="inpaintStrengthVal">3</span>
+          <label>修复质量</label>
+          <select id="inpaintQuality">
+            <option value="fast">⚡ 快速（1秒）</option>
+            <option value="normal" selected>⚖️ 标准（2-3秒）</option>
+            <option value="high">✨ 精细（5-8秒）</option>
+          </select>
         </div>
         <div class="editor-actions">
-          <button class="primary" onclick="smartErase()">✨ 智能消除</button>
+          <button class="primary" onclick="aiErase()">✨ 智能消除</button>
           <button class="gray" onclick="resetImage()">↩️ 重置</button>
         </div>
+
         <div style="margin-top:16px;">
           <div style="font-size:0.85rem;font-weight:600;margin-bottom:8px;">🎨 滤镜</div>
           <div class="filter-grid" id="filterGrid">
-            <div class="filter-item active" data-filter="none" onclick="applyFilter('none')"><div class="f-preview"><img id="fp-none"></div><div class="f-name">原图</div></div>
-            <div class="filter-item" data-filter="grayscale" onclick="applyFilter('grayscale')"><div class="f-preview"><img id="fp-grayscale"></div><div class="f-name">黑白</div></div>
-            <div class="filter-item" data-filter="sepia" onclick="applyFilter('sepia')"><div class="f-preview"><img id="fp-sepia"></div><div class="f-name">复古</div></div>
-            <div class="filter-item" data-filter="vivid" onclick="applyFilter('vivid')"><div class="f-preview"><img id="fp-vivid"></div><div class="f-name">鲜艳</div></div>
-            <div class="filter-item" data-filter="cool" onclick="applyFilter('cool')"><div class="f-preview"><img id="fp-cool"></div><div class="f-name">冷调</div></div>
-            <div class="filter-item" data-filter="warm" onclick="applyFilter('warm')"><div class="f-preview"><img id="fp-warm"></div><div class="f-name">暖调</div></div>
-            <div class="filter-item" data-filter="comic" onclick="applyFilter('comic')"><div class="f-preview"><img id="fp-comic"></div><div class="f-name">漫画</div></div>
-            <div class="filter-item" data-filter="blur" onclick="applyFilter('blur')"><div class="f-preview"><img id="fp-blur"></div><div class="f-name">模糊</div></div>
+            <div class="filter-item active" data-filter="none" onclick="applyFilter('none')"><div class="f-preview"><img id="fp-none" src=""></div><div class="f-name">原图</div></div>
+            <div class="filter-item" data-filter="grayscale" onclick="applyFilter('grayscale')"><div class="f-preview"><img id="fp-grayscale" src=""></div><div class="f-name">黑白</div></div>
+            <div class="filter-item" data-filter="sepia" onclick="applyFilter('sepia')"><div class="f-preview"><img id="fp-sepia" src=""></div><div class="f-name">复古</div></div>
+            <div class="filter-item" data-filter="vivid" onclick="applyFilter('vivid')"><div class="f-preview"><img id="fp-vivid" src=""></div><div class="f-name">鲜艳</div></div>
+            <div class="filter-item" data-filter="cool" onclick="applyFilter('cool')"><div class="f-preview"><img id="fp-cool" src=""></div><div class="f-name">冷调</div></div>
+            <div class="filter-item" data-filter="warm" onclick="applyFilter('warm')"><div class="f-preview"><img id="fp-warm" src=""></div><div class="f-name">暖调</div></div>
+            <div class="filter-item" data-filter="comic" onclick="applyFilter('comic')"><div class="f-preview"><img id="fp-comic" src=""></div><div class="f-name">漫画</div></div>
+            <div class="filter-item" data-filter="blur" onclick="applyFilter('blur')"><div class="f-preview"><img id="fp-blur" src=""></div><div class="f-name">模糊</div></div>
           </div>
         </div>
+
         <div style="margin-top:16px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
             <div style="font-size:0.85rem;font-weight:600;">💧 添加水印</div>
             <label style="display:flex;align-items:center;gap:6px;font-size:0.78rem;cursor:pointer;">
-              <input type="checkbox" id="wmEnable" onchange="toggleWatermarkPanel()" style="width:auto;"> 开启
+              <input type="checkbox" id="wmEnable" onchange="toggleWatermarkPanel()" style="width:auto;">
+              开启
             </label>
           </div>
           <div class="watermark-panel" id="watermarkPanel">
-            <div class="wm-row"><label>文字</label><input type="text" id="wmText" value="© 我的图片" oninput="renderEditorCanvas()"></div>
-            <div class="wm-row"><label>字体</label>
+            <div class="wm-row"><label>文字</label><input type="text" id="wmText" value="© 我的图片" oninput="renderEditorCanvas()" placeholder="输入水印文字"></div>
+            <div class="wm-row">
+              <label>字体</label>
               <select id="wmFont" onchange="renderEditorCanvas()">
                 <option value="'Microsoft YaHei', sans-serif">微软雅黑</option>
                 <option value="SimHei, sans-serif">黑体</option>
@@ -381,9 +700,10 @@ body {
                 <option value="Arial, sans-serif">Arial</option>
               </select>
             </div>
-            <div class="wm-row"><label>大小</label><input type="range" id="wmSize" min="12" max="120" value="36" oninput="renderEditorCanvas(); document.getElementById('wmSizeVal').textContent = this.value + 'px'"><span class="val" id="wmSizeVal" style="min-width:40px;text-align:right;font-weight:600;color:var(--primary-1);">36px</span></div>
+            <div class="wm-row"><label>大小</label><input type="range" id="wmSize" min="12" max="120" value="36" oninput="renderEditorCanvas()"><span class="val" id="wmSizeVal" style="min-width:40px;text-align:right;font-weight:600;color:#7c3aed;">36px</span></div>
             <div class="wm-row"><label>颜色</label><input type="color" id="wmColor" value="#ffffff" onchange="renderEditorCanvas()"><label style="min-width:auto;">透明</label><input type="range" id="wmAlpha" min="0.1" max="1" step="0.05" value="0.7" oninput="renderEditorCanvas()"></div>
-            <div class="wm-row"><label>位置</label>
+            <div class="wm-row">
+              <label>位置</label>
               <select id="wmPosition" onchange="renderEditorCanvas()">
                 <option value="bottom-right">右下角</option>
                 <option value="bottom-left">左下角</option>
@@ -396,6 +716,7 @@ body {
             <div class="wm-row"><label>描边</label><input type="color" id="wmStroke" value="#000000" onchange="renderEditorCanvas()"><input type="range" id="wmStrokeW" min="0" max="6" value="2" oninput="renderEditorCanvas()"></div>
           </div>
         </div>
+
         <div style="margin-top:16px;">
           <div style="font-size:0.85rem;font-weight:600;margin-bottom:8px;">📐 保存画质</div>
           <div class="quality-row">
@@ -405,6 +726,7 @@ body {
             <button class="quality-btn" data-quality="png" onclick="setQuality('png')">💎 无损<br><small>PNG</small></button>
           </div>
         </div>
+
         <div class="editor-actions" style="margin-top:12px;">
           <button class="green" onclick="saveEditedImage()">💾 保存到图床</button>
         </div>
@@ -412,7 +734,7 @@ body {
     </div>
 
     <div id="editorPuzzle" style="display:none;">
-      <div class="editor-drop" onclick="document.getElementById('puzzleImgInput').click()">
+      <div class="editor-drop" id="puzzleImgDrop" onclick="document.getElementById('puzzleImgInput').click()">
         <span class="icon">🧩</span>
         <div class="text">点击添加多张图片</div>
         <div class="hint">2-9 张自动拼图</div>
@@ -420,7 +742,7 @@ body {
       <input type="file" id="puzzleImgInput" accept="image/*" multiple hidden>
       <div class="puzzle-list" id="puzzleList"></div>
       <div style="font-size:0.85rem;font-weight:600;margin-bottom:8px;">🎨 布局</div>
-      <div class="layout-grid">
+      <div class="layout-grid" id="layoutGrid">
         <div class="layout-item active" data-layout="grid2h" onclick="setPuzzleLayout('grid2h')"><span class="l-icon">⬜⬜</span><div class="l-name">左右</div></div>
         <div class="layout-item" data-layout="grid2v" onclick="setPuzzleLayout('grid2v')"><span class="l-icon">⬜<br>⬜</span><div class="l-name">上下</div></div>
         <div class="layout-item" data-layout="grid4" onclick="setPuzzleLayout('grid4')"><span class="l-icon">⊞</span><div class="l-name">四宫格</div></div>
@@ -445,7 +767,7 @@ body {
   <div class="settings-body">
     <div class="field">
       <label>GitHub Token</label>
-      <input type="password" id="tokenInput" placeholder="粘贴 Personal Access Token" autocomplete="off">
+      <input type="password" id="tokenInput" placeholder="粘贴 Personal Access Token" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       <div class="status-line"><span class="dot" id="tokenDot"></span><span id="tokenStatusText">未设置</span></div>
     </div>
     <div class="row" style="margin-bottom:14px;">
@@ -454,7 +776,9 @@ body {
     </div>
     <div class="field">
       <label>操作</label>
-      <div class="row"><button class="danger" onclick="resetAll()">🔄 还原代码</button></div>
+      <div class="row">
+        <button class="danger" onclick="resetAll()">🔄 还原代码</button>
+      </div>
     </div>
   </div>
   <div class="sheet-cancel" onclick="closeSheet('settings')">关闭</div>
@@ -467,7 +791,7 @@ body {
   <div class="restore-body">
     <div class="field">
       <label>文件链接</label>
-      <input type="text" id="restoreUrl" placeholder="https://rsqt5201314.github.io/rsqt/xxx.mp4" autocomplete="off">
+      <input type="text" id="restoreUrl" placeholder="https://rsqt5201314.github.io/rsqt/xxx.mp4" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     </div>
     <button class="restore-btn" onclick="doRestore()">🔍 还原预览</button>
     <div class="restore-preview" id="restorePreview"><div class="hint-text">粘贴链接后点"还原预览"<br>支持图片、视频、音频</div></div>
@@ -494,7 +818,6 @@ body {
 
 <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
 <script>
-/* ===== 全局配置 ===== */
 const CONFIG = {
   GITHUB_USERNAME: 'rsqt5201314',
   REPO_NAME: 'rsqt',
@@ -507,7 +830,7 @@ const CONFIG = {
   CDN_CHECK_INTERVAL: 3000,
   CDN_CHECK_MAX: 40,
   AUDIO_LOAD_TIMEOUT: 5000,
-  MAX_EDIT_SIZE: 2000,
+  MAX_EDIT_SIZE: 1600,
   get BASE_URL() { return `https://${this.GITHUB_USERNAME}.github.io/${this.REPO_NAME}/`; },
   get API_BASE() { return `https://api.github.com/repos/${this.GITHUB_USERNAME}/${this.REPO_NAME}/contents/`; },
   get REPO_API() { return `https://api.github.com/repos/${this.GITHUB_USERNAME}/${this.REPO_NAME}/`; },
@@ -529,10 +852,12 @@ let syncingFiles = new Set();
 let isSelectMode = false;
 let lightboxTargetFile = null;
 let longPressTimer = null;
+
 let editorOriginalImage = null;
 let editorWorkingImage = null;
 let editorMaskCanvas = null;
 let editorStrokes = [];
+let editorCurrentBrush = 'brush';
 let editorCurrentFilter = 'none';
 let editorCtx = null;
 let isDrawing = false;
@@ -618,11 +943,7 @@ function closeSheet(name) {
   document.body.style.overflow = '';
 }
 function openUpload() { openSheet('upload'); }
-function openSettings() {
-  document.getElementById('tokenInput').value = token ? '••••••••••' : '';
-  updateTokenStatus();
-  openSheet('settings');
-}
+function openSettings() { document.getElementById('tokenInput').value = token ? '••••••••••' : ''; updateTokenStatus(); openSheet('settings'); }
 function openRestore() { openSheet('restore'); }
 function openEditor() { openSheet('editor'); if (editorOriginalImage) updateFilterPreviews(); }
 
@@ -640,31 +961,18 @@ function pickFiles() { document.getElementById('fileInput').click(); }
 function saveToken() {
   const inp = document.getElementById('tokenInput');
   const v = inp.value.trim();
-  if (!v || v === '••••••••••') {
-    if (!v) { showToast('请输入 Token', 'warning'); return; }
-    closeSheet('settings'); return;
-  }
-  token = v;
-  localStorage.setItem('gh_token', token);
-  inp.value = '';
-  updateTokenStatus();
-  closeSheet('settings');
-  showToast('Token 已保存', 'success');
-  loadGallery();
+  if (!v || v === '••••••••••') { if (!v) { showToast('请输入 Token', 'warning'); return; } closeSheet('settings'); return; }
+  token = v; localStorage.setItem('gh_token', token); inp.value = '';
+  updateTokenStatus(); closeSheet('settings'); showToast('Token 已保存', 'success'); loadGallery();
 }
 function clearToken() {
   if (!confirm('确定清除 Token？')) return;
-  token = '';
-  localStorage.removeItem('gh_token');
-  document.getElementById('tokenInput').value = '';
-  updateTokenStatus();
-  galleryFiles = []; selectedFiles.clear(); syncingFiles.clear();
-  renderGallery();
+  token = ''; localStorage.removeItem('gh_token'); document.getElementById('tokenInput').value = '';
+  updateTokenStatus(); galleryFiles = []; selectedFiles.clear(); syncingFiles.clear(); renderGallery();
   showToast('Token 已清除', 'info');
 }
 function updateTokenStatus() {
-  const d = document.getElementById('tokenDot');
-  const t = document.getElementById('tokenStatusText');
+  const d = document.getElementById('tokenDot'), t = document.getElementById('tokenStatusText');
   if (token) { d.classList.add('active'); t.textContent = '已设置 ✓'; }
   else { d.classList.remove('active'); t.textContent = '未设置'; }
 }
@@ -676,12 +984,9 @@ function resetAll() {
   showToast('正在还原...', 'success', 1200);
   setTimeout(() => { location.href = location.origin + location.pathname; }, 800);
 }
+
 function getHeaders() {
-  return {
-    'Authorization': `token ${token}`,
-    'Accept': 'application/vnd.github+json',
-    'X-GitHub-Api-Version': '2022-11-28',
-  };
+  return { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
 }
 async function fetchGalleryFromGitHub() {
   if (!token) throw new Error('未设置 Token');
@@ -689,11 +994,15 @@ async function fetchGalleryFromGitHub() {
   const r = await fetch(url, { headers: getHeaders() });
   if (!r.ok) {
     let msg = `获取失败 (HTTP ${r.status})`;
-    try { const d = await r.json(); if (d.message) msg += `: ${d.message}`; if (r.status === 401) msg = 'Token 无效或已过期'; if (r.status === 404) msg = '仓库不存在'; } catch (e) {}
+    try { const d = await r.json(); if (d.message) msg += `: ${d.message}`;
+      if (r.status === 401) msg = 'Token 无效或已过期';
+      if (r.status === 404) msg = '仓库不存在';
+    } catch (e) {}
     throw new Error(msg);
   }
   const data = await r.json();
-  return data.filter(i => i.type === 'file' && !i.name.startsWith('.')).map(i => ({ name: i.name, sha: i.sha, size: i.size || 0, timestamp: extractTimestampFromFilename(i.name), displayName: getDisplayName(i.name) }));
+  return data.filter(i => i.type === 'file' && !i.name.startsWith('.'))
+    .map(i => ({ name: i.name, sha: i.sha, size: i.size || 0, timestamp: extractTimestampFromFilename(i.name), displayName: getDisplayName(i.name) }));
 }
 function blobToBase64(blob) {
   return new Promise((res, rej) => {
@@ -718,7 +1027,11 @@ function uploadViaContentsApi(b64, filename, existingSha = null) {
       if (xhr.status >= 200 && xhr.status < 300) res(JSON.parse(xhr.responseText));
       else {
         let msg = `上传失败 (HTTP ${xhr.status})`;
-        try { const d = JSON.parse(xhr.responseText); if (d.message) msg += `: ${d.message}`; if (xhr.status === 401) msg = 'Token 无效'; if (xhr.status === 403) msg = 'Token 权限不足'; if (xhr.status === 413) msg = '文件超过 100MB'; } catch (e) {}
+        try { const d = JSON.parse(xhr.responseText); if (d.message) msg += `: ${d.message}`;
+          if (xhr.status === 401) msg = 'Token 无效';
+          if (xhr.status === 403) msg = 'Token 权限不足';
+          if (xhr.status === 413) msg = '文件超过 100MB';
+        } catch (e) {}
         rej(new Error(msg));
       }
     };
@@ -755,15 +1068,23 @@ async function uploadBlobToGitHub(blob, filename, existingSha = null) {
 }
 async function deleteFileFromGitHub(filename, sha) {
   if (!token) throw new Error('未设置 Token');
-  const r = await fetch(getApiUrl(filename), { method: 'DELETE', headers: getHeaders(), body: JSON.stringify({ message: `Delete ${filename}`, sha, branch: CONFIG.BRANCH }) });
-  if (!r.ok) { let msg = `删除失败 (HTTP ${r.status})`; try { const d = await r.json(); if (d.message) msg += `: ${d.message}`; } catch (e) {} throw new Error(msg); }
+  const r = await fetch(getApiUrl(filename), {
+    method: 'DELETE', headers: getHeaders(),
+    body: JSON.stringify({ message: `Delete ${filename}`, sha, branch: CONFIG.BRANCH }),
+  });
+  if (!r.ok) {
+    let msg = `删除失败 (HTTP ${r.status})`;
+    try { const d = await r.json(); if (d.message) msg += `: ${d.message}`; } catch (e) {}
+    throw new Error(msg);
+  }
   return true;
 }
+
 function onUploadProgress(filename, pct) {
   const items = document.querySelectorAll('.queue-item');
   for (const it of items) {
     if (it.dataset.filename === filename) {
-      const fill = it.querySelector('.q-fill'); const st = it.querySelector('.q-status');
+      const fill = it.querySelector('.q-fill'), st = it.querySelector('.q-status');
       if (fill) fill.style.width = pct + '%';
       if (st) { st.textContent = pct + '%'; st.className = 'q-status'; }
       break;
@@ -773,7 +1094,8 @@ function onUploadProgress(filename, pct) {
 function addQueueItem(filename, size, displayName, isExtract) {
   const q = document.getElementById('uploadQueue');
   const it = document.createElement('div');
-  it.className = 'queue-item'; it.dataset.filename = filename;
+  it.className = 'queue-item';
+  it.dataset.filename = filename;
   const icon = isVideo(filename) ? '🎬' : isImage(filename) ? '🖼️' : isAudio(filename) ? '🎵' : '📄';
   it.innerHTML = `<span style="font-size:1rem;">${icon}</span><span class="q-name">${escapeHtml(displayName || filename)}</span><div class="q-bar"><div class="q-fill"></div></div><span class="q-status">${isExtract ? '待提取' : '等待'}</span>`;
   q.appendChild(it);
@@ -782,39 +1104,70 @@ function updateQueueItem(filename, status, text) {
   const items = document.querySelectorAll('.queue-item');
   for (const it of items) {
     if (it.dataset.filename === filename) {
-      const fill = it.querySelector('.q-fill'); const st = it.querySelector('.q-status');
-      if (status === 'extracting') { if (fill) { fill.classList.add('extracting'); fill.style.width = '100%'; } if (st) { st.textContent = text || '提取中'; st.className = 'q-status'; } }
-      else { if (fill) { fill.classList.add(status); fill.style.width = '100%'; } if (st) { st.textContent = text || (status === 'success' ? '完成' : '失败'); st.className = `q-status ${status}`; } }
+      const fill = it.querySelector('.q-fill'), st = it.querySelector('.q-status');
+      if (status === 'extracting') {
+        if (fill) { fill.classList.add('extracting'); fill.style.width = '100%'; }
+        if (st) { st.textContent = text || '提取中'; st.className = 'q-status'; }
+      } else {
+        if (fill) { fill.classList.add(status); fill.style.width = '100%'; }
+        if (st) { st.textContent = text || (status === 'success' ? '完成' : '失败'); st.className = `q-status ${status}`; }
+      }
       break;
     }
   }
 }
+
 function audioBufferToWav(audioBuffer, keepLength = null) {
   const nc = audioBuffer.numberOfChannels, sr = audioBuffer.sampleRate;
   const bps = 2, ba = nc * bps;
   const len = keepLength == null ? audioBuffer.length : Math.max(1, Math.min(keepLength, audioBuffer.length));
   const dataSize = len * ba;
-  const buf = new ArrayBuffer(44 + dataSize); const v = new DataView(buf);
+  const buf = new ArrayBuffer(44 + dataSize);
+  const v = new DataView(buf);
   function ws(v, o, s) { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); }
-  ws(v, 0, 'RIFF'); v.setUint32(4, 36 + dataSize, true); ws(v, 8, 'WAVE'); ws(v, 12, 'fmt ');
-  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, nc, true); v.setUint32(24, sr, true);
-  v.setUint32(28, sr * ba, true); v.setUint16(32, ba, true); v.setUint16(34, 16, true);
-  ws(v, 36, 'data'); v.setUint32(40, dataSize, true);
-  const chans = []; for (let i = 0; i < nc; i++) chans.push(audioBuffer.getChannelData(i));
+  ws(v, 0, 'RIFF'); v.setUint32(4, 36 + dataSize, true);
+  ws(v, 8, 'WAVE'); ws(v, 12, 'fmt ');
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+  v.setUint16(22, nc, true); v.setUint32(24, sr, true);
+  v.setUint32(28, sr * ba, true); v.setUint16(32, ba, true);
+  v.setUint16(34, 16, true); ws(v, 36, 'data');
+  v.setUint32(40, dataSize, true);
+  const chans = [];
+  for (let i = 0; i < nc; i++) chans.push(audioBuffer.getChannelData(i));
   let off = 44;
-  for (let i = 0; i < len; i++) for (let ch = 0; ch < nc; ch++) { let s = Math.max(-1, Math.min(1, chans[ch][i])); s = s < 0 ? s * 0x8000 : s * 0x7FFF; v.setInt16(off, s, true); off += 2; }
+  for (let i = 0; i < len; i++) {
+    for (let ch = 0; ch < nc; ch++) {
+      let s = Math.max(-1, Math.min(1, chans[ch][i]));
+      s = s < 0 ? s * 0x8000 : s * 0x7FFF;
+      v.setInt16(off, s, true); off += 2;
+    }
+  }
   return new Blob([buf], { type: 'audio/wav' });
 }
 function audioBufferToMp3(audioBuffer, keepLength, bitrate = 128) {
   if (typeof lamejs === 'undefined') throw new Error('MP3 编码器未加载');
   const nc = Math.min(2, audioBuffer.numberOfChannels), sr = audioBuffer.sampleRate;
   const len = keepLength == null ? audioBuffer.length : Math.max(1, Math.min(keepLength, audioBuffer.length));
-  const left = audioBuffer.getChannelData(0); const right = nc > 1 ? audioBuffer.getChannelData(1) : null;
-  const l16 = new Int16Array(len); const r16 = right ? new Int16Array(len) : null;
-  for (let i = 0; i < len; i++) { let s = Math.max(-1, Math.min(1, left[i])); l16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF; if (right) { let s2 = Math.max(-1, Math.min(1, right[i])); r16[i] = s2 < 0 ? s2 * 0x8000 : s2 * 0x7FFF; } }
-  const enc = new lamejs.Mp3Encoder(nc, sr, bitrate); const blockSize = 1152, data = [];
-  for (let i = 0; i < len; i += blockSize) { const lc = l16.subarray(i, i + blockSize); let buf; if (right) { const rc = r16.subarray(i, i + blockSize); buf = enc.encodeBuffer(lc, rc); } else buf = enc.encodeBuffer(lc); if (buf.length > 0) data.push(new Int8Array(buf)); }
-  const end = enc.flush(); if (end.length > 0) data.push(new Int8Array(end));
+  const left = audioBuffer.getChannelData(0);
+  const right = nc > 1 ? audioBuffer.getChannelData(1) : null;
+  const l16 = new Int16Array(len);
+  const r16 = right ? new Int16Array(len) : null;
+  for (let i = 0; i < len; i++) {
+    let s = Math.max(-1, Math.min(1, left[i]));
+    l16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+    if (right) { let s2 = Math.max(-1, Math.min(1, right[i])); r16[i] = s2 < 0 ? s2 * 0x8000 : s2 * 0x7FFF; }
+  }
+  const enc = new lamejs.Mp3Encoder(nc, sr, bitrate);
+  const blockSize = 1152, data = [];
+  for (let i = 0; i < len; i += blockSize) {
+    const lc = l16.subarray(i, i + blockSize);
+    let buf;
+    if (right) { const rc = r16.subarray(i, i + blockSize); buf = enc.encodeBuffer(lc, rc); }
+    else buf = enc.encodeBuffer(lc);
+    if (buf.length > 0) data.push(new Int8Array(buf));
+  }
+  const end = enc.flush();
+  if (end.length > 0) data.push(new Int8Array(end));
   return new Blob(data, { type: 'audio/mpeg' });
 }
 async function decodeToAudioBuffer(file) {
@@ -822,14 +1175,22 @@ async function decodeToAudioBuffer(file) {
   const Ctx = window.AudioContext || window.webkitAudioContext;
   if (!Ctx) throw new Error('浏览器不支持 AudioContext');
   const ctx = new Ctx();
-  try { return await ctx.decodeAudioData(ab); } finally { try { ctx.close(); } catch (e) {} }
+  try { return await ctx.decodeAudioData(ab); }
+  finally { try { ctx.close(); } catch (e) {} }
 }
 async function extractAudioFromVideo(file, options = {}) {
   const { trimEndSeconds = null, format = 'wav' } = options;
   const buf = await decodeToAudioBuffer(file);
-  const origDur = buf.duration; let keep = buf.length, trim = 0;
-  if (trimEndSeconds && trimEndSeconds > 0) { const ts = Math.floor(trimEndSeconds * buf.sampleRate); keep = buf.length - ts; if (keep <= 0) throw new Error(`音频不足 ${trimEndSeconds} 秒`); trim = trimEndSeconds; }
-  const keptDur = keep / buf.sampleRate; let blob, ext;
+  const origDur = buf.duration;
+  let keep = buf.length, trim = 0;
+  if (trimEndSeconds && trimEndSeconds > 0) {
+    const ts = Math.floor(trimEndSeconds * buf.sampleRate);
+    keep = buf.length - ts;
+    if (keep <= 0) throw new Error(`音频不足 ${trimEndSeconds} 秒`);
+    trim = trimEndSeconds;
+  }
+  const keptDur = keep / buf.sampleRate;
+  let blob, ext;
   if (format === 'mp3') { blob = audioBufferToMp3(buf, keep, CONFIG.MP3_BITRATE); ext = 'mp3'; }
   else { blob = audioBufferToWav(buf, keep); ext = 'wav'; }
   return { blob, ext, originalDuration: origDur, keptDuration: keptDur, trimSeconds: trim };
@@ -841,36 +1202,65 @@ function friendlyExtractError(err) {
   if (/MP3 编码器未加载/i.test(m)) return 'MP3 编码器未加载，请改用 WAV';
   return m;
 }
+
 function getVisibleFiles() {
   let files = galleryFiles;
   if (currentFilter !== 'all') files = files.filter(f => getFileType(f.name) === currentFilter);
-  if (searchKeyword) files = files.filter(f => { const dn = (f.displayName || getDisplayName(f.name)).toLowerCase(); return dn.includes(searchKeyword) || f.name.toLowerCase().includes(searchKeyword); });
+  if (searchKeyword) files = files.filter(f => {
+    const dn = (f.displayName || getDisplayName(f.name)).toLowerCase();
+    return dn.includes(searchKeyword) || f.name.toLowerCase().includes(searchKeyword);
+  });
   return files;
 }
 function renderGallery() {
   const c = document.getElementById('galleryContainer');
   if (!token) { c.innerHTML = `<div class="empty"><div class="icon">🔑</div><div class="text">请先设置 GitHub Token</div><div class="hint">点击右上角 ⚙️ 设置</div></div>`; return; }
   let files = getVisibleFiles();
-  files.sort((a, b) => { if (a.timestamp && b.timestamp) return b.timestamp - a.timestamp; if (a.timestamp) return -1; if (b.timestamp) return 1; return b.name.localeCompare(a.name); });
-  if (files.length === 0) { const msg = searchKeyword ? `未找到「${escapeHtml(searchKeyword)}」` : `暂无${currentFilter !== 'all' ? '此类' : ''}文件`; c.innerHTML = `<div class="empty"><div class="icon">📂</div><div class="text">${msg}</div><div class="hint">${searchKeyword ? '换个关键词试试' : '点右下角 ＋ 上传'}</div></div>`; return; }
+  files.sort((a, b) => {
+    if (a.timestamp && b.timestamp) return b.timestamp - a.timestamp;
+    if (a.timestamp) return -1;
+    if (b.timestamp) return 1;
+    return b.name.localeCompare(a.name);
+  });
+  if (files.length === 0) {
+    const msg = searchKeyword ? `未找到「${escapeHtml(searchKeyword)}」` : `暂无${currentFilter !== 'all' ? '此类' : ''}文件`;
+    c.innerHTML = `<div class="empty"><div class="icon">📂</div><div class="text">${msg}</div><div class="hint">${searchKeyword ? '换个关键词试试' : '点右下角 ＋ 上传'}</div></div>`;
+    return;
+  }
   const groups = {};
-  for (const f of files) { const label = getDateGroupLabel(f.timestamp); if (!groups[label]) groups[label] = []; groups[label].push(f); }
-  const order = Object.keys(groups).sort((a, b) => { const s = { '今天': 0, '昨天': 1, '未知时间': 999 }; const ao = s[a] !== undefined ? s[a] : 2; const bo = s[b] !== undefined ? s[b] : 2; return ao - bo; });
+  for (const f of files) {
+    const label = getDateGroupLabel(f.timestamp);
+    if (!groups[label]) groups[label] = [];
+    groups[label].push(f);
+  }
+  const order = Object.keys(groups).sort((a, b) => {
+    const s = { '今天': 0, '昨天': 1, '未知时间': 999 };
+    const ao = s[a] !== undefined ? s[a] : 2, bo = s[b] !== undefined ? s[b] : 2;
+    return ao - bo;
+  });
   let html = '<div class="gallery-grid">';
-  for (const label of order) { html += `<div class="group-title"><span>📅</span><span>${escapeHtml(label)}</span><span class="count">${groups[label].length}个</span></div>`; for (const f of groups[label]) html += renderCard(f); }
-  html += '</div>'; c.innerHTML = html;
+  for (const label of order) {
+    html += `<div class="group-title"><span>📅</span><span>${escapeHtml(label)}</span><span class="count">${groups[label].length}个</span></div>`;
+    for (const f of groups[label]) html += renderCard(f);
+  }
+  html += '</div>';
+  c.innerHTML = html;
   document.querySelectorAll('audio[data-src]').forEach(el => { if (!el.dataset.armed) { el.dataset.armed = '1'; armAudioTimeout(el); } });
   document.querySelectorAll('video[data-src]').forEach(el => { if (!el.dataset.armed) { el.dataset.armed = '1'; armVideoTimeout(el); } });
   updateSelectBar();
 }
 function renderCard(f) {
   const ext = getFileExtension(f.name);
-  const extUrl = getExternalUrl(f.name); const mediaUrl = getMediaUrl(f.name);
-  const isImg = isImage(f.name); const isAud = isAudio(f.name); const isVid = isVideo(f.name);
+  const extUrl = getExternalUrl(f.name);
+  const mediaUrl = getMediaUrl(f.name);
+  const isImg = isImage(f.name), isAud = isAudio(f.name), isVid = isVideo(f.name);
   const displayName = f.displayName || getDisplayName(f.name);
   const timeBadge = f.timestamp ? formatTimeShort(f.timestamp) : '';
-  const safeName = escapeHtml(f.name); const safeUrl = escapeHtml(extUrl); const safeMedia = escapeHtml(mediaUrl);
-  const isSelected = selectedFiles.has(f.name); const isSyncing = syncingFiles.has(f.name);
+  const safeName = escapeHtml(f.name);
+  const safeUrl = escapeHtml(extUrl);
+  const safeMedia = escapeHtml(mediaUrl);
+  const isSelected = selectedFiles.has(f.name);
+  const isSyncing = syncingFiles.has(f.name);
   let thumbHtml;
   if (isImg) thumbHtml = `<img src="${safeMedia}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'>🖼️<span>加载失败</span></div>';">`;
   else if (isVid) thumbHtml = `<div class="placeholder">🎬<span>${ext.toUpperCase()}</span></div><span class="play-icon">▶</span>`;
@@ -888,7 +1278,14 @@ function renderCard(f) {
         <div class="checkbox" data-cb="${safeName}">✓</div>
         ${thumbHtml}
       </div>
-      <div class="info"><div class="name">${escapeHtml(displayName)}</div><div class="meta"><span>${formatFileSize(f.size)}</span><span style="opacity:0.5;">·</span><span>${isImg ? '🖼️图' : isAud ? '🎵音' : isVid ? '🎬视' : '📄'}</span></div></div>
+      <div class="info">
+        <div class="name">${escapeHtml(displayName)}</div>
+        <div class="meta">
+          <span>${formatFileSize(f.size)}</span>
+          <span style="opacity:0.5;">·</span>
+          <span>${isImg ? '🖼️图' : isAud ? '🎵音' : isVid ? '🎬视' : '📄'}</span>
+        </div>
+      </div>
       ${playerHtml}
       <div class="actions">
         <button class="btn primary" onclick="copyLink('${safeName}')">📋复制</button>
@@ -903,23 +1300,58 @@ function renderCard(f) {
     </div>
   `;
 }
+
 async function playViaBlob(el, url, mime) {
-  try { const r = await fetch(url, { mode: 'cors' }); if (!r.ok) throw new Error('HTTP ' + r.status); const raw = await r.blob(); const blob = new Blob([raw], { type: mime }); el.src = URL.createObjectURL(blob); el.load(); try { await el.play().catch(() => {}); } catch (e) {} } catch (e) {}
+  try {
+    const r = await fetch(url, { mode: 'cors' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const raw = await r.blob();
+    const blob = new Blob([raw], { type: mime });
+    el.src = URL.createObjectURL(blob); el.load();
+    try { await el.play().catch(() => {}); } catch (e) {}
+  } catch (e) { console.error('[blob 兜底失败]', e); }
 }
 function armAudioTimeout(el) {
   if (el.readyState >= 2) return;
   if (el._to) clearTimeout(el._to);
-  el._to = setTimeout(() => { if (el.readyState >= 2) return; const url = el.dataset.src || el.src; const mime = el.dataset.mime || 'audio/mpeg'; if (url) playViaBlob(el, url, mime); }, CONFIG.AUDIO_LOAD_TIMEOUT);
+  el._to = setTimeout(() => {
+    if (el.readyState >= 2) return;
+    const url = el.dataset.src || el.src;
+    const mime = el.dataset.mime || 'audio/mpeg';
+    if (url) playViaBlob(el, url, mime);
+  }, CONFIG.AUDIO_LOAD_TIMEOUT);
   el.addEventListener('loadeddata', function once() { el.removeEventListener('loadeddata', once); if (el._to) { clearTimeout(el._to); el._to = null; } });
-  el.addEventListener('error', function onErr() { el.removeEventListener('error', onErr); if (el.dataset.blobTried === '1') return; el.dataset.blobTried = '1'; const url = el.dataset.src || el.src; const mime = el.dataset.mime || 'audio/mpeg'; if (url) playViaBlob(el, url, mime); });
+  el.addEventListener('error', function onErr() {
+    el.removeEventListener('error', onErr);
+    if (el.dataset.blobTried === '1') return;
+    el.dataset.blobTried = '1';
+    const url = el.dataset.src || el.src;
+    const mime = el.dataset.mime || 'audio/mpeg';
+    if (url) playViaBlob(el, url, mime);
+  });
 }
 function armVideoTimeout(el) {
   if (el.readyState >= 2) return;
   if (el._to) clearTimeout(el._to);
-  el._to = setTimeout(() => { if (el.readyState >= 2) return; const url = el.dataset.src || el.src; const ext = getFileExtension(url.split('?')[0]); const mime = getVideoMimeType(ext); if (url) playViaBlob(el, url, mime); }, CONFIG.AUDIO_LOAD_TIMEOUT);
+  el._to = setTimeout(() => {
+    if (el.readyState >= 2) return;
+    const url = el.dataset.src || el.src;
+    const ext = getFileExtension(url.split('?')[0]);
+    const mime = getVideoMimeType(ext);
+    if (url) playViaBlob(el, url, mime);
+  }, CONFIG.AUDIO_LOAD_TIMEOUT);
   el.addEventListener('loadeddata', function once() { el.removeEventListener('loadeddata', once); if (el._to) { clearTimeout(el._to); el._to = null; } });
-  el.addEventListener('error', function onErr() { el.removeEventListener('error', onErr); if (el.dataset.blobTried === '1') return; el.dataset.blobTried = '1'; const url = el.dataset.src || el.src; const ext = getFileExtension(url.split('?')[0]); const mime = getVideoMimeType(ext); if (url) playViaBlob(el, url, mime); });
+  el.addEventListener('error', function onErr() {
+    el.removeEventListener('error', onErr);
+    if (el.dataset.blobTried === '1') return;
+    el.dataset.blobTried = '1';
+    const url = el.dataset.src || el.src;
+    const ext = getFileExtension(url.split('?')[0]);
+    const mime = getVideoMimeType(ext);
+    if (url) playViaBlob(el, url, mime);
+  });
 }
+
 function onThumbClick(filename, event) {
   if (event) event.stopPropagation();
   if (isSelectMode) { toggleSelect(filename); return; }
@@ -928,30 +1360,69 @@ function onThumbClick(filename, event) {
 }
 const galleryContainer = document.getElementById('galleryContainer');
 galleryContainer.addEventListener('touchstart', (e) => {
-  const card = e.target.closest('.card'); if (!card) return;
+  const card = e.target.closest('.card');
+  if (!card) return;
   if (e.target.closest('audio, video, button, .checkbox')) return;
-  longPressTimer = setTimeout(() => { if (!isSelectMode) enterSelectMode(); toggleSelect(card.dataset.filename); if (navigator.vibrate) navigator.vibrate(30); }, 500);
+  longPressTimer = setTimeout(() => {
+    if (!isSelectMode) enterSelectMode();
+    toggleSelect(card.dataset.filename);
+    if (navigator.vibrate) navigator.vibrate(30);
+  }, 500);
 }, { passive: true });
-['touchend', 'touchmove', 'touchcancel'].forEach(ev => { galleryContainer.addEventListener(ev, () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } }, { passive: true }); });
-function openLightbox(filename) { const file = galleryFiles.find(f => f.name === filename); if (!file) return; lightboxTargetFile = file; document.getElementById('lightboxImg').src = getMediaUrl(file.name); document.getElementById('lightbox').classList.add('show'); document.body.style.overflow = 'hidden'; }
+['touchend', 'touchmove', 'touchcancel'].forEach(ev => {
+  galleryContainer.addEventListener(ev, () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } }, { passive: true });
+});
+function openLightbox(filename) {
+  const file = galleryFiles.find(f => f.name === filename);
+  if (!file) return;
+  lightboxTargetFile = file;
+  document.getElementById('lightboxImg').src = getMediaUrl(file.name);
+  document.getElementById('lightbox').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
 function closeLightbox() { document.getElementById('lightbox').classList.remove('show'); document.body.style.overflow = ''; lightboxTargetFile = null; }
 function lightboxDownload() { if (lightboxTargetFile) downloadFile(lightboxTargetFile.name); }
 function lightboxCopy() { if (lightboxTargetFile) copyLink(lightboxTargetFile.name); }
-function copyLink(filename) { const url = getExternalUrl(filename); if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(url).then(() => showToast('链接已复制', 'success')).catch(() => fallbackCopy(url)); } else fallbackCopy(url); }
-function fallbackCopy(text) { const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); showToast('链接已复制', 'success'); } catch (e) { showToast('复制失败', 'error'); } document.body.removeChild(ta); }
+
+function copyLink(filename) {
+  const url = getExternalUrl(filename);
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(() => showToast('链接已复制', 'success')).catch(() => fallbackCopy(url));
+  else fallbackCopy(url);
+}
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); showToast('链接已复制', 'success'); } catch (e) { showToast('复制失败', 'error'); }
+  document.body.removeChild(ta);
+}
 function openLink(filename) { window.open(getExternalUrl(filename), '_blank'); }
 async function downloadFile(filename) {
-  const url = getExternalUrl(filename); const dn = getDisplayName(filename);
-  try { showToast('准备下载...', 'info', 1000); const r = await fetch(url); if (!r.ok) throw new Error('HTTP ' + r.status); const blob = await r.blob(); const blobUrl = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = blobUrl; a.download = dn; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(() => URL.revokeObjectURL(blobUrl), 3000); showToast('已开始下载', 'success'); }
-  catch (e) { window.open(url, '_blank'); showToast('请长按选择"保存到手机"', 'info', 3500); }
+  const url = getExternalUrl(filename);
+  const dn = getDisplayName(filename);
+  try {
+    showToast('准备下载...', 'info', 1000);
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const blob = await r.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl; a.download = dn;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
+    showToast('已开始下载', 'success');
+  } catch (e) { window.open(url, '_blank'); showToast('请长按选择"保存到手机"', 'info', 3500); }
 }
 async function renameFile(oldName) {
-  const file = galleryFiles.find(f => f.name === oldName); if (!file) { showToast('文件不存在', 'warning'); return; }
-  const ext = getFileExtension(oldName); const oldDisplay = getDisplayName(oldName);
+  const file = galleryFiles.find(f => f.name === oldName);
+  if (!file) { showToast('文件不存在', 'warning'); return; }
+  const ext = getFileExtension(oldName);
+  const oldDisplay = getDisplayName(oldName);
   const oldBase = oldDisplay.toLowerCase().endsWith('.' + ext) ? oldDisplay.substring(0, oldDisplay.length - ext.length - 1) : oldDisplay;
   const input = prompt(`重命名\n\n当前：${oldBase}.${ext}\n请输入新文件名（不含扩展名）：`, oldBase);
   if (input === null) return;
-  const newBase = input.trim(); if (!newBase) { showToast('名称不能为空', 'warning'); return; }
+  const newBase = input.trim();
+  if (!newBase) { showToast('名称不能为空', 'warning'); return; }
   if (newBase === oldBase) { showToast('名称未修改', 'info'); return; }
   const tsMatch = oldName.match(/^(\d{8}_\d{6})_/);
   const prefix = tsMatch ? tsMatch[1] + '_' : generateTimestamp() + '_';
@@ -960,81 +1431,165 @@ async function renameFile(oldName) {
   if (newName === oldName) { showToast('名称未变化', 'info'); return; }
   try {
     showToast('正在重命名...', 'info', 1500);
-    const r = await fetch(getExternalUrl(oldName) + '?t=' + Date.now()); if (!r.ok) throw new Error('下载旧文件失败');
-    const blob = await r.blob(); await uploadBlobToGitHub(blob, newName);
-    syncingFiles.add(newName); await loadGallery();
+    const r = await fetch(getExternalUrl(oldName) + '?t=' + Date.now());
+    if (!r.ok) throw new Error('下载旧文件失败');
+    const blob = await r.blob();
+    await uploadBlobToGitHub(blob, newName);
+    syncingFiles.add(newName);
+    await loadGallery();
     let ok = false;
-    for (let i = 0; i < CONFIG.CDN_CHECK_MAX; i++) { await sleep(CONFIG.CDN_CHECK_INTERVAL); try { const c = await fetch(getExternalUrl(newName) + '?c=' + Date.now(), { method: 'HEAD', cache: 'no-store' }); if (c.ok) { ok = true; break; } } catch (e) {} }
+    for (let i = 0; i < CONFIG.CDN_CHECK_MAX; i++) {
+      await sleep(CONFIG.CDN_CHECK_INTERVAL);
+      try { const c = await fetch(getExternalUrl(newName) + '?c=' + Date.now(), { method: 'HEAD', cache: 'no-store' }); if (c.ok) { ok = true; break; } } catch (e) {}
+    }
     try { await deleteFileFromGitHub(oldName, file.sha); } catch (e) {}
-    syncingFiles.delete(newName); await loadGallery();
+    syncingFiles.delete(newName);
+    await loadGallery();
     showToast(ok ? `✅ 已重命名` : `⚠️ 重命名完成，CDN 同步中`, ok ? 'success' : 'warning', 3000);
-  } catch (err) { syncingFiles.delete(newName); showToast('重命名失败：' + err.message, 'error', 4000); }
+  } catch (err) { console.error(err); syncingFiles.delete(newName); showToast('重命名失败：' + err.message, 'error', 4000); }
 }
 async function deleteFile(filename) {
-  const file = galleryFiles.find(f => f.name === filename); if (!file) { showToast('文件不存在', 'warning'); return; }
+  const file = galleryFiles.find(f => f.name === filename);
+  if (!file) { showToast('文件不存在', 'warning'); return; }
   if (!confirm(`确定删除"${getDisplayName(filename)}"？`)) return;
-  try { await deleteFileFromGitHub(filename, file.sha); showToast('已删除', 'success'); galleryFiles = galleryFiles.filter(f => f.name !== filename); selectedFiles.delete(filename); syncingFiles.delete(filename); renderGallery(); } catch (e) { showToast(e.message, 'error'); }
+  try {
+    await deleteFileFromGitHub(filename, file.sha);
+    showToast('已删除', 'success');
+    galleryFiles = galleryFiles.filter(f => f.name !== filename);
+    selectedFiles.delete(filename); syncingFiles.delete(filename);
+    renderGallery();
+  } catch (e) { showToast(e.message, 'error'); }
 }
+
 function enterSelectMode() { isSelectMode = true; document.getElementById('selectBar').classList.add('show'); }
-function exitSelectMode() { isSelectMode = false; selectedFiles.clear(); document.getElementById('selectBar').classList.remove('show'); document.querySelectorAll('.card.selected').forEach(c => c.classList.remove('selected')); updateSelectBar(); }
+function exitSelectMode() {
+  isSelectMode = false; selectedFiles.clear();
+  document.getElementById('selectBar').classList.remove('show');
+  document.querySelectorAll('.card.selected').forEach(c => c.classList.remove('selected'));
+  updateSelectBar();
+}
 function toggleSelect(filename) {
   if (!isSelectMode) enterSelectMode();
   if (selectedFiles.has(filename)) selectedFiles.delete(filename); else selectedFiles.add(filename);
-  const card = document.querySelector(`.card[data-filename="${CSS.escape(filename)}"]`); if (card) card.classList.toggle('selected', selectedFiles.has(filename));
+  const card = document.querySelector(`.card[data-filename="${CSS.escape(filename)}"]`);
+  if (card) card.classList.toggle('selected', selectedFiles.has(filename));
   if (selectedFiles.size === 0) exitSelectMode();
   updateSelectBar();
 }
-function selectAllVisible() { getVisibleFiles().forEach(f => selectedFiles.add(f.name)); document.querySelectorAll('.card').forEach(c => { if (selectedFiles.has(c.dataset.filename)) c.classList.add('selected'); }); updateSelectBar(); }
-function updateSelectBar() { document.getElementById('selCount').textContent = selectedFiles.size; document.getElementById('batchDeleteBtn').disabled = selectedFiles.size === 0; }
+function selectAllVisible() {
+  getVisibleFiles().forEach(f => selectedFiles.add(f.name));
+  document.querySelectorAll('.card').forEach(c => { if (selectedFiles.has(c.dataset.filename)) c.classList.add('selected'); });
+  updateSelectBar();
+}
+function updateSelectBar() {
+  document.getElementById('selCount').textContent = selectedFiles.size;
+  document.getElementById('batchDeleteBtn').disabled = selectedFiles.size === 0;
+}
 async function batchDelete() {
   if (selectedFiles.size === 0) return;
   if (!confirm(`删除选中的 ${selectedFiles.size} 个文件？不可恢复`)) return;
-  const files = galleryFiles.filter(f => selectedFiles.has(f.name)); let ok = 0, fail = 0;
+  const files = galleryFiles.filter(f => selectedFiles.has(f.name));
+  let ok = 0, fail = 0;
   for (const f of files) { try { await deleteFileFromGitHub(f.name, f.sha); ok++; } catch (e) { fail++; } }
   showToast(`删除完成：${ok}个成功${fail > 0 ? `，${fail}个失败` : ''}`, fail > 0 ? 'warning' : 'success', 3000);
   exitSelectMode(); loadGallery();
 }
-function onSearchChange(v) { searchKeyword = (v || '').trim().toLowerCase(); document.getElementById('searchClear').classList.toggle('show', !!searchKeyword); renderGallery(); }
-function clearSearch() { document.getElementById('searchInput').value = ''; searchKeyword = ''; document.getElementById('searchClear').classList.remove('show'); renderGallery(); }
-function setFilter(f) { currentFilter = f; document.querySelectorAll('.filter-tab').forEach(t => t.classList.toggle('active', t.dataset.filter === f)); renderGallery(); }
-document.getElementById('fileInput').addEventListener('change', function(e) { if (e.target.files && e.target.files.length > 0) { handleFiles(e.target.files); e.target.value = ''; } });
+
+function onSearchChange(v) {
+  searchKeyword = (v || '').trim().toLowerCase();
+  document.getElementById('searchClear').classList.toggle('show', !!searchKeyword);
+  renderGallery();
+}
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  searchKeyword = '';
+  document.getElementById('searchClear').classList.remove('show');
+  renderGallery();
+}
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.toggle('active', t.dataset.filter === f));
+  renderGallery();
+}
+
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  if (e.target.files && e.target.files.length > 0) { handleFiles(e.target.files); e.target.value = ''; }
+});
 async function handleFiles(fileList) {
   if (!token) { showToast('请先设置 Token', 'warning', 2500); closeSheet('upload'); openSettings(); return; }
   if (isUploading) { showToast('已有上传进行中', 'warning'); return; }
   const files = Array.from(fileList);
   if (files.length > CONFIG.MAX_FILES) { showToast(`一次最多 ${CONFIG.MAX_FILES} 个`, 'error', 3000); return; }
   const ok = [], over = [], unknown = [];
-  for (const f of files) { if (f.size > CONFIG.MAX_FILE_SIZE) { over.push(f.name); continue; } if (!isSupported(f.name)) unknown.push(f.name); ok.push(f); }
+  for (const f of files) {
+    if (f.size > CONFIG.MAX_FILE_SIZE) { over.push(f.name); continue; }
+    if (!isSupported(f.name)) unknown.push(f.name);
+    ok.push(f);
+  }
   if (unknown.length > 0) showToast(`未知类型：${unknown.slice(0, 2).join(', ')}`, 'warning', 2500);
   if (over.length > 0) showToast(`超过 100MB：${over.slice(0, 2).join(', ')}`, 'error', 3000);
   if (ok.length === 0) return;
-  pendingFiles = ok; await startUpload();
+  pendingFiles = ok;
+  await startUpload();
 }
 async function startUpload() {
   if (pendingFiles.length === 0 || isUploading) return;
   isUploading = true;
-  const files = [...pendingFiles]; pendingFiles = [];
+  const files = [...pendingFiles];
+  pendingFiles = [];
   document.getElementById('uploadQueue').innerHTML = '';
-  const tasks = []; const trimMode = (extractMode === 'trim-audio'); const fmt = outputFormat;
+  const tasks = [];
+  const trimMode = (extractMode === 'trim-audio');
+  const fmt = outputFormat;
   for (const f of files) {
-    const isVid = isVideo(f.name); const newName = addTimestampToFilename(f.name); const displayName = getDisplayName(newName); const type = getFileType(f.name);
-    if (trimMode) { if (isVid) tasks.push({ type: 'extract', file: f, filename: newName, displayName, isExtract: true, audioOnly: true, trimEnd: CONFIG.TRIM_SECONDS, format: fmt }); else { const nf = new File([f], newName, { type: f.type || '' }); tasks.push({ type, file: nf, filename: newName, displayName, isExtract: false }); } continue; }
+    const isVid = isVideo(f.name);
+    const newName = addTimestampToFilename(f.name);
+    const displayName = getDisplayName(newName);
+    const type = getFileType(f.name);
+    if (trimMode) {
+      if (isVid) tasks.push({ type: 'extract', file: f, filename: newName, displayName, isExtract: true, audioOnly: true, trimEnd: CONFIG.TRIM_SECONDS, format: fmt });
+      else { const nf = new File([f], newName, { type: f.type || '' }); tasks.push({ type, file: nf, filename: newName, displayName, isExtract: false }); }
+      continue;
+    }
     const eTask = { type: 'extract', file: f, filename: newName, displayName, isExtract: true, audioOnly: false, format: 'wav' };
-    if (isVid && extractMode === 'audio-only') { eTask.audioOnly = true; tasks.push(eTask); } else { const nf = new File([f], newName, { type: f.type || '' }); tasks.push({ type, file: nf, filename: newName, displayName, isExtract: false }); if (isVid && extractMode === 'both') tasks.push(eTask); }
+    if (isVid && extractMode === 'audio-only') { eTask.audioOnly = true; tasks.push(eTask); }
+    else {
+      const nf = new File([f], newName, { type: f.type || '' });
+      tasks.push({ type, file: nf, filename: newName, displayName, isExtract: false });
+      if (isVid && extractMode === 'both') tasks.push(eTask);
+    }
   }
-  for (const t of tasks) { if (t.type === 'extract') { const fn = t.filename.replace(/\.[^.]+$/, '.' + (t.format || 'wav')); const label = t.trimEnd ? `✂️ ${getDisplayName(fn)}` : `🎵 ${getDisplayName(fn)}`; addQueueItem(t.filename, t.file.size, label, true); } else addQueueItem(t.filename, t.file.size, t.displayName, false); }
-  const nameMap = {}; for (const f of galleryFiles) nameMap[f.name] = f.sha;
-  let successCount = 0, failCount = 0; const failed = [];
   for (const t of tasks) {
     if (t.type === 'extract') {
-      const fmt2 = t.format || 'wav'; const audioName = t.filename.replace(/\.[^.]+$/, '.' + fmt2);
+      const fn = t.filename.replace(/\.[^.]+$/, '.' + (t.format || 'wav'));
+      const label = t.trimEnd ? `✂️ ${getDisplayName(fn)}` : `🎵 ${getDisplayName(fn)}`;
+      addQueueItem(t.filename, t.file.size, label, true);
+    } else addQueueItem(t.filename, t.file.size, t.displayName, false);
+  }
+  const nameMap = {};
+  for (const f of galleryFiles) nameMap[f.name] = f.sha;
+  let successCount = 0, failCount = 0;
+  const failed = [];
+  for (const t of tasks) {
+    if (t.type === 'extract') {
+      const fmt2 = t.format || 'wav';
+      const audioName = t.filename.replace(/\.[^.]+$/, '.' + fmt2);
       updateQueueItem(t.filename, 'extracting', '提取中');
-      try { const result = await extractAudioFromVideo(t.file, { trimEndSeconds: t.trimEnd || null, format: fmt2 }); const af = new File([result.blob], audioName, { type: fmt2 === 'mp3' ? 'audio/mpeg' : 'audio/wav' }); const existSha = nameMap[audioName] || null; await uploadBlobToGitHub(af, audioName, existSha); updateQueueItem(t.filename, 'success', '完成'); successCount++; }
-      catch (err) { updateQueueItem(t.filename, 'error', '失败'); failed.push(`${t.displayName}: ${friendlyExtractError(err)}`); failCount++; }
+      try {
+        const result = await extractAudioFromVideo(t.file, { trimEndSeconds: t.trimEnd || null, format: fmt2 });
+        const af = new File([result.blob], audioName, { type: fmt2 === 'mp3' ? 'audio/mpeg' : 'audio/wav' });
+        const existSha = nameMap[audioName] || null;
+        await uploadBlobToGitHub(af, audioName, existSha);
+        updateQueueItem(t.filename, 'success', '完成');
+        successCount++;
+      } catch (err) { updateQueueItem(t.filename, 'error', '失败'); failed.push(`${t.displayName}: ${friendlyExtractError(err)}`); failCount++; }
     } else {
       const existSha = nameMap[t.filename] || null;
-      try { await uploadBlobToGitHub(t.file, t.filename, existSha); updateQueueItem(t.filename, 'success', '完成'); successCount++; }
-      catch (err) { updateQueueItem(t.filename, 'error', '失败'); failed.push(`${t.displayName}: ${err.message}`); failCount++; }
+      try {
+        await uploadBlobToGitHub(t.file, t.filename, existSha);
+        updateQueueItem(t.filename, 'success', '完成');
+        successCount++;
+      } catch (err) { updateQueueItem(t.filename, 'error', '失败'); failed.push(`${t.displayName}: ${err.message}`); failCount++; }
     }
   }
   isUploading = false;
@@ -1043,6 +1598,7 @@ async function startUpload() {
   if (failed.length > 0) for (let i = 0; i < Math.min(failed.length, 2); i++) setTimeout(() => showToast('❌ ' + failed[i], 'error', 5000), 400 + i * 600);
   setTimeout(() => { document.getElementById('uploadQueue').innerHTML = ''; closeSheet('upload'); loadGallery(); }, 2000);
 }
+
 async function loadGallery() {
   const c = document.getElementById('galleryContainer');
   if (!token) { renderGallery(); return; }
@@ -1059,47 +1615,108 @@ async function loadGallery() {
     showToast(err.message, 'error', 3000);
   }
 }
+
 let restoredUrl = '';
 async function doRestore() {
-  const input = document.getElementById('restoreUrl'); const url = input.value.trim();
-  const preview = document.getElementById('restorePreview'); const actions = document.getElementById('restoreActions');
+  const input = document.getElementById('restoreUrl');
+  const url = input.value.trim();
+  const preview = document.getElementById('restorePreview');
+  const actions = document.getElementById('restoreActions');
   if (!url) { showToast('请粘贴链接', 'warning'); return; }
   if (!/^https?:\/\//i.test(url)) { showToast('链接必须以 http(s):// 开头', 'warning'); return; }
-  let ext = ''; try { const u = new URL(url); const last = u.pathname.split('/').pop(); if (last && last.includes('.')) ext = last.split('.').pop().toLowerCase(); } catch (e) {}
-  restoredUrl = url; preview.innerHTML = '<div class="hint-text">加载中...</div>'; actions.style.display = 'none';
-  const isImgExt = CONFIG.IMAGE_EXTENSIONS.includes(ext); const isVidExt = CONFIG.VIDEO_EXTENSIONS.includes(ext); const isAudExt = CONFIG.AUDIO_EXTENSIONS.includes(ext);
+  let ext = '';
+  try { const u = new URL(url); const last = u.pathname.split('/').pop(); if (last && last.includes('.')) ext = last.split('.').pop().toLowerCase(); } catch (e) {}
+  restoredUrl = url;
+  preview.innerHTML = '<div class="hint-text">加载中...</div>';
+  actions.style.display = 'none';
+  const isImgExt = CONFIG.IMAGE_EXTENSIONS.includes(ext);
+  const isVidExt = CONFIG.VIDEO_EXTENSIONS.includes(ext);
+  const isAudExt = CONFIG.AUDIO_EXTENSIONS.includes(ext);
   try {
-    if (isImgExt) { const img = new Image(); img.onload = () => { preview.innerHTML = ''; preview.appendChild(img); actions.style.display = 'flex'; }; img.onerror = () => { preview.innerHTML = '<div class="hint-text">❌ 图片加载失败</div>'; }; img.src = url; }
-    else if (isVidExt) { const v = document.createElement('video'); v.controls = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'metadata'; v.style.maxWidth = '100%'; v.style.maxHeight = '60vh'; v.onloadedmetadata = () => { preview.innerHTML = ''; preview.appendChild(v); actions.style.display = 'flex'; }; v.onerror = () => { preview.innerHTML = '<div class="hint-text">❌ 视频加载失败</div>'; }; v.src = url; }
-    else if (isAudExt) { const a = document.createElement('audio'); a.controls = true; a.preload = 'metadata'; a.style.width = '100%'; a.onloadedmetadata = () => { preview.innerHTML = ''; preview.appendChild(a); actions.style.display = 'flex'; }; a.onerror = () => { preview.innerHTML = '<div class="hint-text">❌ 音频加载失败</div>'; }; a.src = url; }
-    else { preview.innerHTML = '<div class="hint-text">⚠️ 无法识别类型</div>'; actions.style.display = 'flex'; }
+    if (isImgExt) {
+      const img = new Image();
+      img.onload = () => { preview.innerHTML = ''; preview.appendChild(img); actions.style.display = 'flex'; };
+      img.onerror = () => { preview.innerHTML = '<div class="hint-text">❌ 图片加载失败</div>'; };
+      img.src = url;
+    } else if (isVidExt) {
+      const v = document.createElement('video');
+      v.controls = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
+      v.preload = 'metadata'; v.style.maxWidth = '100%'; v.style.maxHeight = '60vh';
+      v.onloadedmetadata = () => { preview.innerHTML = ''; preview.appendChild(v); actions.style.display = 'flex'; };
+      v.onerror = () => { preview.innerHTML = '<div class="hint-text">❌ 视频加载失败</div>'; };
+      v.src = url;
+    } else if (isAudExt) {
+      const a = document.createElement('audio');
+      a.controls = true; a.preload = 'metadata'; a.style.width = '100%';
+      a.onloadedmetadata = () => { preview.innerHTML = ''; preview.appendChild(a); actions.style.display = 'flex'; };
+      a.onerror = () => { preview.innerHTML = '<div class="hint-text">❌ 音频加载失败</div>'; };
+      a.src = url;
+    } else {
+      preview.innerHTML = '<div class="hint-text">⚠️ 无法识别类型</div>';
+      actions.style.display = 'flex';
+    }
   } catch (e) { preview.innerHTML = '<div class="hint-text">❌ ' + escapeHtml(e.message) + '</div>'; }
 }
 function restoreCopy() { if (restoredUrl) fallbackCopy(restoredUrl); }
 async function restoreDownload() {
   if (!restoredUrl) return;
-  try { const r = await fetch(restoredUrl); if (!r.ok) throw new Error('HTTP ' + r.status); const blob = await r.blob(); const name = restoredUrl.split('/').pop().split('?')[0] || 'file'; const blobUrl = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = blobUrl; a.download = decodeURIComponent(name); document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(() => URL.revokeObjectURL(blobUrl), 3000); showToast('已开始下载', 'success'); }
-  catch (e) { window.open(restoredUrl, '_blank'); showToast('请长按选择保存', 'info', 3000); }
+  try {
+    const r = await fetch(restoredUrl);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const blob = await r.blob();
+    const name = restoredUrl.split('/').pop().split('?')[0] || 'file';
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl; a.download = decodeURIComponent(name);
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
+    showToast('已开始下载', 'success');
+  } catch (e) { window.open(restoredUrl, '_blank'); showToast('请长按选择保存', 'info', 3000); }
 }
 async function restoreUploadToGallery() {
-  if (!restoredUrl) return; if (!token) { showToast('请先设置 Token', 'warning'); return; }
-  try { showToast('正在下载到图库...', 'info', 1200); const r = await fetch(restoredUrl); if (!r.ok) throw new Error('HTTP ' + r.status); const blob = await r.blob(); const name = restoredUrl.split('/').pop().split('?')[0] || 'file'; const newName = addTimestampToFilename(decodeURIComponent(name)); await uploadBlobToGitHub(blob, newName); showToast('已上传到图库', 'success', 2000); loadGallery(); }
-  catch (e) { showToast('上传失败：' + e.message, 'error', 3000); }
+  if (!restoredUrl) return;
+  if (!token) { showToast('请先设置 Token', 'warning'); return; }
+  try {
+    showToast('正在下载到图库...', 'info', 1200);
+    const r = await fetch(restoredUrl);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const blob = await r.blob();
+    const name = restoredUrl.split('/').pop().split('?')[0] || 'file';
+    const newName = addTimestampToFilename(decodeURIComponent(name));
+    await uploadBlobToGitHub(blob, newName);
+    showToast('已上传到图库', 'success', 2000);
+    loadGallery();
+  } catch (e) { showToast('上传失败：' + e.message, 'error', 3000); }
 }
 
-/* ===== 图片编辑器（纯 Canvas 智能消除）===== */
+/* ============ 图片编辑器（剩余部分） ============ */
 function switchEditorTab(tab) {
   document.querySelectorAll('.editor-tab').forEach(t => t.classList.toggle('active', t.dataset.etab === tab));
   document.getElementById('editorSingle').style.display = tab === 'single' ? 'block' : 'none';
   document.getElementById('editorPuzzle').style.display = tab === 'puzzle' ? 'block' : 'none';
   if (tab === 'puzzle' && puzzleImages.length > 0) renderPuzzle();
 }
-document.getElementById('editorImgInput').addEventListener('change', function(e) { const file = e.target.files && e.target.files[0]; e.target.value = ''; if (file) loadEditorImage(file); });
-document.getElementById('puzzleImgInput').addEventListener('change', function(e) { const files = e.target.files ? Array.from(e.target.files) : []; e.target.value = ''; if (files.length) addPuzzleImages(files); });
+document.getElementById('editorImgInput').addEventListener('change', function(e) {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (file) loadEditorImage(file);
+});
+document.getElementById('puzzleImgInput').addEventListener('change', function(e) {
+  const files = e.target.files ? Array.from(e.target.files) : [];
+  e.target.value = '';
+  if (files.length) addPuzzleImages(files);
+});
 async function editImageFromGallery(filename) {
   if (!token) { showToast('请先设置 Token', 'warning'); return; }
-  try { showToast('加载中...', 'info', 1000); const r = await fetch(getExternalUrl(filename)); if (!r.ok) throw new Error('HTTP ' + r.status); const blob = await r.blob(); const file = new File([blob], getDisplayName(filename), { type: blob.type || 'image/jpeg' }); openEditor(); await loadEditorImage(file); }
-  catch (e) { showToast('加载失败：' + e.message, 'error', 3000); }
+  try {
+    showToast('加载中...', 'info', 1000);
+    const r = await fetch(getExternalUrl(filename));
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const blob = await r.blob();
+    const file = new File([blob], getDisplayName(filename), { type: blob.type || 'image/jpeg' });
+    openEditor();
+    await loadEditorImage(file);
+  } catch (e) { showToast('加载失败：' + e.message, 'error', 3000); }
 }
 async function loadEditorImage(file) {
   try {
@@ -1108,28 +1725,49 @@ async function loadEditorImage(file) {
     const maxSize = CONFIG.MAX_EDIT_SIZE;
     if (img.width > maxSize || img.height > maxSize) {
       const scale = Math.min(maxSize / img.width, maxSize / img.height);
-      const c = document.createElement('canvas'); c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
-      const cx = c.getContext('2d'); cx.drawImage(img, 0, 0, c.width, c.height);
-      const newImg = new Image(); await new Promise(res => { newImg.onload = res; newImg.src = c.toDataURL('image/jpeg', 0.95); }); img = newImg;
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * scale);
+      c.height = Math.round(img.height * scale);
+      const cx = c.getContext('2d');
+      cx.drawImage(img, 0, 0, c.width, c.height);
+      const newImg = new Image();
+      await new Promise(res => { newImg.onload = res; newImg.src = c.toDataURL('image/jpeg', 0.95); });
+      img = newImg;
     }
-    editorOriginalImage = img; editorWorkingImage = img; editorStrokes = []; editorCurrentFilter = 'none';
+    editorOriginalImage = img;
+    editorWorkingImage = img;
+    editorStrokes = [];
+    editorCurrentFilter = 'none';
     if (!editorMaskCanvas) editorMaskCanvas = document.createElement('canvas');
-    editorMaskCanvas.width = img.width; editorMaskCanvas.height = img.height;
+    editorMaskCanvas.width = img.width;
+    editorMaskCanvas.height = img.height;
     editorMaskCanvas.getContext('2d').clearRect(0, 0, img.width, img.height);
     document.getElementById('editorCanvasWrap').style.display = 'flex';
     document.getElementById('editorTools').style.display = 'block';
-    setupEditorCanvas(); renderEditorCanvas(); updateFilterPreviews();
+    setupEditorCanvas();
+    renderEditorCanvas();
+    updateFilterPreviews();
     document.querySelectorAll('.filter-item').forEach(el => el.classList.toggle('active', el.dataset.filter === 'none'));
+    showToast('可以开始编辑了', 'success', 1200);
   } catch (e) { showToast('图片加载失败：' + e.message, 'error', 3000); }
 }
-function loadImage(src) { return new Promise((res, rej) => { const img = new Image(); img.onload = () => res(img); img.onerror = () => rej(new Error('图片加载失败')); img.src = src; }); }
+function loadImage(src) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => res(img);
+    img.onerror = () => rej(new Error('图片加载失败'));
+    img.src = src;
+  });
+}
 function setupEditorCanvas() {
   const canvas = document.getElementById('editorCanvas');
   const img = editorOriginalImage;
   const maxW = Math.min(window.innerWidth - 40, 800);
   const scale = Math.min(1, maxW / img.width);
-  canvas.width = img.width; canvas.height = img.height;
-  canvas.style.width = (img.width * scale) + 'px'; canvas.style.height = (img.height * scale) + 'px';
+  canvas.width = img.width;
+  canvas.height = img.height;
+  canvas.style.width = (img.width * scale) + 'px';
+  canvas.style.height = (img.height * scale) + 'px';
   editorCtx = canvas.getContext('2d');
   if (!canvas.dataset.bound) {
     canvas.dataset.bound = '1';
@@ -1140,9 +1778,21 @@ function setupEditorCanvas() {
     canvas.addEventListener('pointerleave', onPointerUp);
   }
 }
-function getCanvasPos(canvas, e) { const rect = canvas.getBoundingClientRect(); return { x: (e.clientX - rect.left) * (canvas.width / rect.width), y: (e.clientY - rect.top) * (canvas.height / rect.height) }; }
+function getCanvasPos(canvas, e) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left) * (canvas.width / rect.width),
+    y: (e.clientY - rect.top) * (canvas.height / rect.height)
+  };
+}
 function onPointerDown(e) {
-  if (!editorOriginalImage) return; e.preventDefault();
+  if (!editorWorkingImage) return;
+  e.preventDefault();
+  if (editorCurrentBrush === 'magic') {
+    const pos = getCanvasPos(e.currentTarget, e);
+    applyMagicWand(pos.x, pos.y);
+    return;
+  }
   isDrawing = true;
   const pos = getCanvasPos(e.currentTarget, e);
   const brushSize = parseInt(document.getElementById('brushSize').value);
@@ -1152,19 +1802,24 @@ function onPointerDown(e) {
   redrawMask();
 }
 function onPointerMove(e) {
-  if (!isDrawing || !currentStroke) return; e.preventDefault();
+  if (!isDrawing || !currentStroke) return;
+  e.preventDefault();
   const pos = getCanvasPos(e.currentTarget, e);
   const last = currentStroke.points[currentStroke.points.length - 1];
   if (Math.hypot(pos.x - last.x, pos.y - last.y) < 2) return;
-  currentStroke.points.push(pos); redrawMask();
+  currentStroke.points.push(pos);
+  redrawMask();
 }
-function onPointerUp() { if (!isDrawing) return; isDrawing = false; currentStroke = null; }
+function onPointerUp(e) { if (!isDrawing) return; isDrawing = false; currentStroke = null; }
 function redrawMask() {
   const mctx = editorMaskCanvas.getContext('2d');
   mctx.clearRect(0, 0, editorMaskCanvas.width, editorMaskCanvas.height);
   for (const stroke of editorStrokes) {
-    mctx.fillStyle = 'rgba(255,0,0,0.5)'; mctx.strokeStyle = 'rgba(255,0,0,0.5)';
-    mctx.lineWidth = stroke.brushSize; mctx.lineCap = 'round'; mctx.lineJoin = 'round';
+    mctx.fillStyle = 'rgba(255,0,0,0.5)';
+    mctx.strokeStyle = 'rgba(255,0,0,0.5)';
+    mctx.lineWidth = stroke.brushSize;
+    mctx.lineCap = 'round';
+    mctx.lineJoin = 'round';
     const pts = stroke.points;
     if (pts.length === 1) { mctx.beginPath(); mctx.arc(pts[0].x, pts[0].y, stroke.brushSize / 2, 0, Math.PI * 2); mctx.fill(); }
     else { mctx.beginPath(); mctx.moveTo(pts[0].x, pts[0].y); for (let i = 1; i < pts.length; i++) mctx.lineTo(pts[i].x, pts[i].y); mctx.stroke(); }
@@ -1173,7 +1828,8 @@ function redrawMask() {
 }
 function renderEditorCanvas() {
   if (!editorCtx || !editorWorkingImage) return;
-  const c = editorCtx.canvas; const ctx = editorCtx;
+  const c = editorCtx.canvas;
+  const ctx = editorCtx;
   ctx.filter = getFilterCSS(editorCurrentFilter);
   ctx.clearRect(0, 0, c.width, c.height);
   ctx.drawImage(editorWorkingImage, 0, 0);
@@ -1185,6 +1841,7 @@ function drawWatermark(ctx) {
   const text = document.getElementById('wmText').value || '© 我的图片';
   const font = document.getElementById('wmFont').value;
   const size = parseInt(document.getElementById('wmSize').value);
+  document.getElementById('wmSizeVal').textContent = size + 'px';
   const color = document.getElementById('wmColor').value;
   const alpha = parseFloat(document.getElementById('wmAlpha').value);
   const pos = document.getElementById('wmPosition').value;
@@ -1192,16 +1849,21 @@ function drawWatermark(ctx) {
   const strokeW = parseInt(document.getElementById('wmStrokeW').value);
   const W = ctx.canvas.width, H = ctx.canvas.height;
   ctx.save();
-  ctx.font = `${size}px ${font}`; ctx.textBaseline = 'middle'; ctx.globalAlpha = alpha;
-  const metrics = ctx.measureText(text); const textW = metrics.width;
+  ctx.font = `${size}px ${font}`;
+  ctx.textBaseline = 'middle';
+  ctx.globalAlpha = alpha;
+  const metrics = ctx.measureText(text);
+  const textW = metrics.width;
   const pad = size * 0.5;
   function drawOne(x, y, align = 'left') {
     ctx.textAlign = align;
     if (strokeW > 0) { ctx.lineWidth = strokeW; ctx.strokeStyle = strokeColor; ctx.lineJoin = 'round'; ctx.strokeText(text, x, y); }
     ctx.fillStyle = color; ctx.fillText(text, x, y);
   }
-  if (pos === 'tile') { const stepX = textW + size * 2; const stepY = size * 3; for (let y = stepY / 2; y < H; y += stepY) for (let x = stepX / 2; x < W; x += stepX) drawOne(x, y); }
-  else if (pos === 'center') drawOne(W / 2, H / 2, 'center');
+  if (pos === 'tile') {
+    const stepX = textW + size * 2, stepY = size * 3;
+    for (let y = stepY / 2; y < H; y += stepY) for (let x = stepX / 2; x < W; x += stepX) drawOne(x, y);
+  } else if (pos === 'center') drawOne(W / 2, H / 2, 'center');
   else if (pos === 'bottom-right') drawOne(W - pad, H - pad, 'right');
   else if (pos === 'bottom-left') drawOne(pad, H - pad, 'left');
   else if (pos === 'top-right') drawOne(W - pad, pad, 'right');
@@ -1220,162 +1882,287 @@ function getFilterCSS(name) {
     default: return 'none';
   }
 }
-function setBrushTool(tool) { document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active')); document.querySelector(`.tool-btn[data-tool="${tool}"]`)?.classList.add('active'); }
+function setBrushTool(tool) {
+  editorCurrentBrush = tool;
+  document.querySelectorAll('.tool-btn[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === tool));
+  document.getElementById('brushRow').style.display = tool === 'brush' ? 'flex' : 'none';
+  document.getElementById('magicRow').style.display = tool === 'magic' ? 'flex' : 'none';
+  const hint = document.getElementById('magicHint');
+  if (tool === 'magic') { hint.classList.add('show'); setTimeout(() => hint.classList.remove('show'), 2500); }
+}
 function undoStroke() { if (editorStrokes.length > 0) { editorStrokes.pop(); redrawMask(); showToast('已撤销一笔', 'info', 1000); } else showToast('没有可撤销的涂抹', 'info', 1000); }
 function clearMask() { editorStrokes = []; redrawMask(); showToast('已清空涂抹', 'info', 1000); }
 function toggleWatermarkPanel() { document.getElementById('watermarkPanel').classList.toggle('show', document.getElementById('wmEnable').checked); renderEditorCanvas(); }
 function setQuality(q) { editorQuality = q; document.querySelectorAll('.quality-btn').forEach(b => b.classList.toggle('active', b.dataset.quality === q)); }
+function applyFilter(name) { editorCurrentFilter = name; document.querySelectorAll('.filter-item').forEach(el => el.classList.toggle('active', el.dataset.filter === name)); renderEditorCanvas(); }
+function updateFilterPreviews() {
+  if (!editorWorkingImage) return;
+  const img = editorWorkingImage;
+  const size = 100;
+  const ir = img.width / img.height;
+  let dw, dh;
+  if (ir > 1) { dh = size; dw = dh * ir; } else { dw = size; dh = dw / ir; }
+  const filters = ['none', 'grayscale', 'sepia', 'vivid', 'cool', 'warm', 'comic', 'blur'];
+  for (const f of filters) {
+    const c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    const cx = c.getContext('2d');
+    cx.filter = getFilterCSS(f);
+    cx.drawImage(img, (size - dw) / 2, (size - dh) / 2, dw, dh);
+    const el = document.getElementById('fp-' + f);
+    if (el) el.src = c.toDataURL('image/jpeg', 0.6);
+  }
+}
 
-/* ===== 智能消除（纯 Canvas 实现，不用 OpenCV）===== */
-async function smartErase() {
+/* ============ 魔法棒（纯 Canvas BFS flood fill） ============ */
+function applyMagicWand(x, y) {
+  if (!editorWorkingImage) return;
+  try {
+    const W = editorMaskCanvas.width, H = editorMaskCanvas.height;
+    // 拿到当前渲染画面（含滤镜）的像素
+    const refC = document.createElement('canvas');
+    refC.width = W; refC.height = H;
+    const rctx = refC.getContext('2d');
+    rctx.filter = getFilterCSS(editorCurrentFilter);
+    rctx.drawImage(editorWorkingImage, 0, 0);
+    rctx.filter = 'none';
+    const imgData = rctx.getImageData(0, 0, W, H).data;
+    const sx = Math.round(x), sy = Math.round(y);
+    if (sx < 0 || sx >= W || sy < 0 || sy >= H) return;
+    const si = (sy * W + sx) * 4;
+    const targetR = imgData[si], targetG = imgData[si + 1], targetB = imgData[si + 2];
+    const tol = parseInt(document.getElementById('magicTol').value);
+    const tol2 = tol * tol * 3;
+    // 生成 mask
+    const mC = document.createElement('canvas');
+    mC.width = W; mC.height = H;
+    const mcx = mC.getContext('2d');
+    const outData = mcx.createImageData(W, H);
+    const visited = new Uint8Array(W * H);
+    const stack = [[sx, sy]];
+    while (stack.length > 0) {
+      const [cx, cy] = stack.pop();
+      if (cx < 0 || cx >= W || cy < 0 || cy >= H) continue;
+      const ci = cy * W + cx;
+      if (visited[ci]) continue;
+      visited[ci] = 1;
+      const c4 = ci * 4;
+      const dr = imgData[c4] - targetR;
+      const dg = imgData[c4 + 1] - targetG;
+      const db = imgData[c4 + 2] - targetB;
+      if (dr * dr + dg * dg + db * db > tol2) continue;
+      outData.data[c4] = 255; outData.data[c4 + 1] = 0; outData.data[c4 + 2] = 0; outData.data[c4 + 3] = 128;
+      stack.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
+    }
+    mcx.putImageData(outData, 0, 0);
+    const maskCtx = editorMaskCanvas.getContext('2d');
+    maskCtx.drawImage(mC, 0, 0);
+    renderEditorCanvas();
+    showToast('✅ 已选中相似色块，点「智能消除」修复', 'success', 2000);
+  } catch (e) { console.error('[魔法棒失败]', e); showToast('魔法棒失败：' + e.message, 'error', 3000); }
+}
+
+/* ============ 智能消除：多尺度内容感知填充 ============ */
+async function aiErase() {
   if (!editorWorkingImage) { showToast('请先选择图片', 'warning'); return; }
   if (editorStrokes.length === 0) { showToast('请先涂抹要消除的区域', 'warning'); return; }
   try {
-    showToast('正在智能修复...', 'info', 1200);
+    showToast('AI 正在智能修复...', 'info', 1500);
+    // 给 UI 时间更新
+    await sleep(80);
     const W = editorWorkingImage.width, H = editorWorkingImage.height;
-    // 1) 生成遮罩（黑白）
+    // 合成当前画面（含滤镜）
+    const srcC = document.createElement('canvas');
+    srcC.width = W; srcC.height = H;
+    const sctx = srcC.getContext('2d');
+    sctx.filter = getFilterCSS(editorCurrentFilter);
+    sctx.drawImage(editorWorkingImage, 0, 0);
+    sctx.filter = 'none';
+    // 生成纯黑底白 mask
     const maskC = document.createElement('canvas');
     maskC.width = W; maskC.height = H;
     const mctx = maskC.getContext('2d');
     mctx.fillStyle = '#000'; mctx.fillRect(0, 0, W, H);
-    const strokeData = editorMaskCanvas.getContext('2d').getImageData(0, 0, W, H);
+    const maskData = editorMaskCanvas.getContext('2d').getImageData(0, 0, W, H);
     const outData = mctx.getImageData(0, 0, W, H);
-    for (let i = 0; i < strokeData.data.length; i += 4) {
-      if (strokeData.data[i + 3] > 10) { outData.data[i] = 255; outData.data[i + 1] = 255; outData.data[i + 2] = 255; outData.data[i + 3] = 255; }
+    for (let i = 0; i < maskData.data.length; i += 4) {
+      if (maskData.data[i + 3] > 10) { outData.data[i] = 255; outData.data[i + 1] = 255; outData.data[i + 2] = 255; outData.data[i + 3] = 255; }
     }
     mctx.putImageData(outData, 0, 0);
-
-    // 2) 生成当前底图（含滤镜）
-    const baseC = document.createElement('canvas');
-    baseC.width = W; baseC.height = H;
-    const bctx = baseC.getContext('2d');
-    bctx.filter = getFilterCSS(editorCurrentFilter);
-    bctx.drawImage(editorWorkingImage, 0, 0);
-    bctx.filter = 'none';
-
-    // 3) 智能填充：对 mask 每个像素，用周围非遮罩区域颜色做加权平均
-    const baseImg = bctx.getImageData(0, 0, W, H);
-    const baseData = baseImg.data;
-    const maskImg = mctx.getImageData(0, 0, W, H);
-    const maskData = maskImg.data;
-    const result = new ImageData(W, H);
-    const resultData = result.data;
-
-    // 复制原图作为初始
-    for (let i = 0; i < baseData.length; i++) resultData[i] = baseData[i];
-
-    // 迭代次数（修复强度）
-    const strength = parseInt(document.getElementById('inpaintStrength').value);
-    const iterations = strength * 2 + 1;
-    const radius = Math.max(2, strength * 2);
-
-    // 用一个拷贝来做多轮迭代
-    let cur = new Uint8ClampedArray(baseData);
-    const isMask = new Uint8Array(W * H);
-    for (let i = 0; i < W * H; i++) {
-      isMask[i] = maskData[i * 4] > 128 ? 1 : 0;
-    }
-
-    // 收集边界像素（紧邻遮罩外）的坐标
-    // 多轮迭代式填充（从边界向内扩散）
-    for (let iter = 0; iter < iterations; iter++) {
-      const next = new Uint8ClampedArray(cur);
-      // 找出当前所有"未填充遮罩"
-      let changed = 0;
-      for (let y = 1; y < H - 1; y++) {
-        for (let x = 1; x < W - 1; x++) {
-          const idx = y * W + x;
-          if (!isMask[idx]) continue;
-          // 检查是否已经填过（用 alpha 判断）
-          // 用更聪明的方式：检查邻居非遮罩
-          let sr = 0, sg = 0, sb = 0, cnt = 0;
-          for (let dy = -radius; dy <= radius; dy++) {
-            for (let dx = -radius; dx <= radius; dx++) {
-              const nx = x + dx, ny = y + dy;
-              if (nx < 0 || nx >= W || ny < 0 || ny >= H) continue;
-              const nIdx = ny * W + nx;
-              if (isMask[nIdx]) continue;
-              const pi = nIdx * 4;
-              const w = 1 / (dx * dx + dy * dy + 0.001);
-              sr += cur[pi] * w;
-              sg += cur[pi + 1] * w;
-              sb += cur[pi + 2] * w;
-              cnt += w;
-            }
-          }
-          if (cnt > 0) {
-            const pi = idx * 4;
-            const newR = sr / cnt, newG = sg / cnt, newB = sb / cnt;
-            if (Math.abs(newR - cur[pi]) > 0.5 || Math.abs(newG - cur[pi + 1]) > 0.5 || Math.abs(newB - cur[pi + 2]) > 0.5) {
-              next[pi] = newR;
-              next[pi + 1] = newG;
-              next[pi + 2] = newB;
-              next[pi + 3] = 255;
-              changed++;
-            }
-          }
-        }
-      }
-      cur = next;
-      if (changed === 0) break;
-    }
-
-    // 4) 输出到结果图
-    const finalImg = new ImageData(W, H);
-    for (let i = 0; i < W * H; i++) {
-      const pi = i * 4;
-      finalImg.data[pi] = cur[pi];
-      finalImg.data[pi + 1] = cur[pi + 1];
-      finalImg.data[pi + 2] = cur[pi + 2];
-      finalImg.data[pi + 3] = 255;
-    }
-    const outC = document.createElement('canvas');
-    outC.width = W; outC.height = H;
-    outC.getContext('2d').putImageData(finalImg, 0, 0);
-
-    // 5) 转成 image 覆盖到工作图
+    // 根据质量选择参数
+    const quality = document.getElementById('inpaintQuality').value;
+    let maxLevels = 4, iters = 3;
+    if (quality === 'fast') { maxLevels = 3; iters = 2; }
+    else if (quality === 'high') { maxLevels = 5; iters = 6; }
+    // 多尺度填充
+    const result = await multiScaleInpaint(srcC, maskC, maxLevels, iters);
     const newImg = new Image();
-    await new Promise(res => { newImg.onload = res; newImg.src = outC.toDataURL('image/png'); });
+    await new Promise((res, rej) => { newImg.onload = res; newImg.onerror = rej; newImg.src = result.toDataURL('image/png'); });
     editorWorkingImage = newImg;
     editorStrokes = [];
     editorMaskCanvas.getContext('2d').clearRect(0, 0, W, H);
-
     renderEditorCanvas();
     updateFilterPreviews();
-    showToast('✨ 智能消除完成！', 'success', 2000);
-  } catch (e) {
-    console.error('[消除失败]', e);
-    showToast('消除失败：' + e.message, 'error', 4000);
-  }
+    showToast('✨ AI 消除完成！', 'success', 2000);
+  } catch (e) { console.error('[AI 消除失败]', e); showToast('消除失败：' + e.message, 'error', 4000); }
 }
+
+async function multiScaleInpaint(srcCanvas, maskCanvas, maxLevels, iters) {
+  // 构建金字塔
+  const levels = [{ src: srcCanvas, mask: maskCanvas }];
+  for (let l = 1; l < maxLevels; l++) {
+    const prev = levels[levels.length - 1];
+    if (prev.src.width < 24 || prev.src.height < 24) break;
+    const nw = Math.max(1, Math.floor(prev.src.width / 2));
+    const nh = Math.max(1, Math.floor(prev.src.height / 2));
+    const nc = document.createElement('canvas'); nc.width = nw; nc.height = nh;
+    const ncx = nc.getContext('2d'); ncx.imageSmoothingEnabled = true;
+    ncx.drawImage(prev.src, 0, 0, nw, nh);
+    const nm = document.createElement('canvas'); nm.width = nw; nm.height = nh;
+    const nmx = nm.getContext('2d'); nmx.imageSmoothingEnabled = true;
+    nmx.drawImage(prev.mask, 0, 0, nw, nh);
+    const nmd = nmx.getImageData(0, 0, nw, nh);
+    for (let i = 0; i < nmd.data.length; i += 4) {
+      const v = nmd.data[i] > 128 ? 255 : 0;
+      nmd.data[i] = v; nmd.data[i + 1] = v; nmd.data[i + 2] = v; nmd.data[i + 3] = 255;
+    }
+    nmx.putImageData(nmd, 0, 0);
+    levels.push({ src: nc, mask: nm });
+  }
+  // 从最粗级开始
+  const coarsest = levels[levels.length - 1];
+  inpaintAtLevel(coarsest.src, coarsest.mask, iters * 3);
+  // 逐级向上：把粗级放大填充到细级的 mask 区域，再细化
+  for (let l = levels.length - 2; l >= 0; l--) {
+    const cur = levels[l];
+    const finer = levels[l + 1];
+    const cx = cur.src.getContext('2d');
+    const cw = cur.src.width, ch = cur.src.height;
+    const curImg = cx.getImageData(0, 0, cw, ch);
+    const curMask = cur.mask.getContext('2d').getImageData(0, 0, cw, ch);
+    const finerImg = finer.src.getContext('2d').getImageData(0, 0, finer.src.width, finer.src.height);
+    for (let y = 0; y < ch; y++) {
+      for (let x = 0; x < cw; x++) {
+        const i = (y * cw + x) * 4;
+        if (curMask.data[i] > 128) {
+          const fx = Math.min(finer.src.width - 1, Math.floor(x / 2));
+          const fy = Math.min(finer.src.height - 1, Math.floor(y / 2));
+          const fi = (fy * finer.src.width + fx) * 4;
+          curImg.data[i] = finerImg.data[fi];
+          curImg.data[i + 1] = finerImg.data[fi + 1];
+          curImg.data[i + 2] = finerImg.data[fi + 2];
+        }
+      }
+    }
+    cx.putImageData(curImg, 0, 0);
+    inpaintAtLevel(cur.src, cur.mask, iters);
+  }
+  return levels[0].src;
+}
+
+function inpaintAtLevel(canvas, maskCanvas, iterations) {
+  const W = canvas.width, H = canvas.height;
+  const ctx = canvas.getContext('2d');
+  const mctx = maskCanvas.getContext('2d');
+  const imageData = ctx.getImageData(0, 0, W, H);
+  const maskData = mctx.getImageData(0, 0, W, H);
+  const d = imageData.data;
+  const m = maskData.data;
+  const isMasked = new Uint8Array(W * H);
+  for (let i = 0; i < W * H; i++) isMasked[i] = m[i * 4] > 128 ? 1 : 0;
+
+  // BFS 扩散填充
+  const dist = new Int32Array(W * H).fill(-1);
+  for (let i = 0; i < W * H; i++) if (!isMasked[i]) dist[i] = 0;
+  const queue = [];
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const i = y * W + x;
+      if (!isMasked[i]) continue;
+      let near = false;
+      for (let dy = -1; dy <= 1 && !near; dy++)
+        for (let dx = -1; dx <= 1; dx++) {
+          if (dx === 0 && dy === 0) continue;
+          const nx = x + dx, ny = y + dy;
+          if (nx < 0 || nx >= W || ny < 0 || ny >= H) continue;
+          if (!isMasked[ny * W + nx]) { near = true; break; }
+        }
+      if (near) queue.push(i);
+    }
+  }
+  let head = 0;
+  while (head < queue.length) {
+    const i = queue[head++];
+    if (dist[i] >= 0) continue;
+    const y = Math.floor(i / W), x = i % W;
+    let sumR = 0, sumG = 0, sumB = 0, sumW = 0, bestD = Infinity;
+    for (let dy = -2; dy <= 2; dy++) {
+      for (let dx = -2; dx <= 2; dx++) {
+        if (dx === 0 && dy === 0) continue;
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || nx >= W || ny < 0 || ny >= H) continue;
+        const ni = ny * W + nx;
+        if (dist[ni] < 0) continue;
+        const w = 1 / (1 + Math.abs(dx) + Math.abs(dy));
+        sumR += d[ni * 4] * w; sumG += d[ni * 4 + 1] * w; sumB += d[ni * 4 + 2] * w; sumW += w;
+        if (dist[ni] < bestD) bestD = dist[ni];
+      }
+    }
+    if (sumW === 0) continue;
+    d[i * 4] = sumR / sumW; d[i * 4 + 1] = sumG / sumW; d[i * 4 + 2] = sumB / sumW;
+    dist[i] = bestD + 1;
+    for (let dy = -1; dy <= 1; dy++)
+      for (let dx = -1; dx <= 1; dx++) {
+        if (dx === 0 && dy === 0) continue;
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || nx >= W || ny < 0 || ny >= H) continue;
+        const ni = ny * W + nx;
+        if (isMasked[ni] && dist[ni] < 0) queue.push(ni);
+      }
+  }
+  // 平滑迭代
+  for (let it = 0; it < iterations; it++) {
+    const tmpR = new Float32Array(W * H);
+    const tmpG = new Float32Array(W * H);
+    const tmpB = new Float32Array(W * H);
+    for (let i = 0; i < W * H; i++) { tmpR[i] = d[i * 4]; tmpG[i] = d[i * 4 + 1]; tmpB[i] = d[i * 4 + 2]; }
+    for (let y = 1; y < H - 1; y++) {
+      for (let x = 1; x < W - 1; x++) {
+        const i = y * W + x;
+        if (!isMasked[i]) continue;
+        let sR = 0, sG = 0, sB = 0, sw = 0;
+        for (let dy = -1; dy <= 1; dy++)
+          for (let dx = -1; dx <= 1; dx++) {
+            if (dx === 0 && dy === 0) continue;
+            const ni = (y + dy) * W + (x + dx);
+            const w = (dx === 0 || dy === 0) ? 2 : 1;
+            sR += tmpR[ni] * w; sG += tmpG[ni] * w; sB += tmpB[ni] * w; sw += w;
+          }
+        if (sw > 0) { d[i * 4] = sR / sw; d[i * 4 + 1] = sG / sw; d[i * 4 + 2] = sB / sw; }
+      }
+    }
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
 function resetImage() {
   if (!editorOriginalImage) return;
-  editorWorkingImage = editorOriginalImage; editorStrokes = [];
+  editorWorkingImage = editorOriginalImage;
+  editorStrokes = [];
   if (editorMaskCanvas) editorMaskCanvas.getContext('2d').clearRect(0, 0, editorMaskCanvas.width, editorMaskCanvas.height);
-  renderEditorCanvas(); updateFilterPreviews();
+  renderEditorCanvas();
+  updateFilterPreviews();
   showToast('已重置到原图', 'info', 1500);
 }
-function applyFilter(name) { editorCurrentFilter = name; document.querySelectorAll('.filter-item').forEach(el => el.classList.toggle('active', el.dataset.filter === name)); renderEditorCanvas(); }
-function updateFilterPreviews() {
-  if (!editorWorkingImage) return;
-  const img = editorWorkingImage; const size = 100;
-  const ir = img.width / img.height; let dw, dh;
-  if (ir > 1) { dh = size; dw = dh * ir; } else { dw = size; dh = dw / ir; }
-  const filters = ['none', 'grayscale', 'sepia', 'vivid', 'cool', 'warm', 'comic', 'blur'];
-  for (const f of filters) {
-    const c = document.createElement('canvas'); c.width = size; c.height = size;
-    const cx = c.getContext('2d'); cx.filter = getFilterCSS(f);
-    cx.drawImage(img, (size - dw) / 2, (size - dh) / 2, dw, dh);
-    const el = document.getElementById('fp-' + f); if (el) el.src = c.toDataURL('image/jpeg', 0.6);
-  }
-}
+
 async function saveEditedImage() {
   if (!editorWorkingImage) { showToast('请先选择图片', 'warning'); return; }
   if (!token) { showToast('请先设置 Token', 'warning'); return; }
   try {
     showToast('正在生成图片...', 'info', 1000);
     const c = document.createElement('canvas');
-    c.width = editorWorkingImage.width; c.height = editorWorkingImage.height;
+    c.width = editorWorkingImage.width;
+    c.height = editorWorkingImage.height;
     const cx = c.getContext('2d');
     cx.filter = getFilterCSS(editorCurrentFilter);
     cx.drawImage(editorWorkingImage, 0, 0);
@@ -1383,7 +2170,11 @@ async function saveEditedImage() {
     if (document.getElementById('wmEnable').checked) drawWatermark(cx);
     let blob, ext;
     if (editorQuality === 'png') { blob = await new Promise(res => c.toBlob(res, 'image/png')); ext = 'png'; }
-    else { const q = editorQuality === 'low' ? 0.6 : editorQuality === 'high' ? 0.95 : 0.85; blob = await new Promise(res => c.toBlob(res, 'image/jpeg', q)); ext = 'jpg'; }
+    else {
+      const q = editorQuality === 'low' ? 0.6 : editorQuality === 'high' ? 0.95 : 0.85;
+      blob = await new Promise(res => c.toBlob(res, 'image/jpeg', q));
+      ext = 'jpg';
+    }
     const newName = addTimestampToFilename('编辑图片.' + ext, ext);
     showToast('正在上传...', 'info', 1000);
     await uploadBlobToGitHub(blob, newName);
@@ -1391,19 +2182,35 @@ async function saveEditedImage() {
     loadGallery();
   } catch (e) { showToast('保存失败：' + e.message, 'error', 3000); }
 }
+
+/* ============ 拼图 ============ */
 async function addPuzzleImages(files) {
   for (const f of files) {
     if (!f.type.startsWith('image/')) continue;
-    try { const url = URL.createObjectURL(f); const img = await loadImage(url); puzzleImages.push({ img, url }); } catch (e) {}
+    try {
+      const url = URL.createObjectURL(f);
+      const img = await loadImage(url);
+      puzzleImages.push({ img, url });
+    } catch (e) {}
   }
   renderPuzzleList(); renderPuzzle();
 }
 function renderPuzzleList() {
   const list = document.getElementById('puzzleList');
-  list.innerHTML = puzzleImages.map((p, i) => `<div class="puzzle-item"><img src="${p.url}" alt=""><button class="p-del" onclick="removePuzzleImage(${i})">✕</button><div class="p-num">${i + 1}</div></div>`).join('');
+  list.innerHTML = puzzleImages.map((p, i) => `
+    <div class="puzzle-item">
+      <img src="${p.url}" alt="">
+      <button class="p-del" onclick="removePuzzleImage(${i})">✕</button>
+      <div class="p-num">${i + 1}</div>
+    </div>
+  `).join('');
 }
 function removePuzzleImage(i) { puzzleImages.splice(i, 1); renderPuzzleList(); renderPuzzle(); }
-function setPuzzleLayout(layout) { puzzleLayout = layout; document.querySelectorAll('.layout-item').forEach(el => el.classList.toggle('active', el.dataset.layout === layout)); renderPuzzle(); }
+function setPuzzleLayout(layout) {
+  puzzleLayout = layout;
+  document.querySelectorAll('.layout-item').forEach(el => el.classList.toggle('active', el.dataset.layout === layout));
+  renderPuzzle();
+}
 function renderPuzzle() {
   if (puzzleImages.length === 0) { document.getElementById('puzzleCanvasWrap').style.display = 'none'; return; }
   document.getElementById('puzzleCanvasWrap').style.display = 'flex';
@@ -1412,24 +2219,60 @@ function renderPuzzle() {
   const radius = parseInt(document.getElementById('puzzleRadius').value);
   document.getElementById('puzzleGapVal').textContent = gap + 'px';
   document.getElementById('puzzleRadiusVal').textContent = radius + 'px';
-  const W = 1080; let H = 1080;
-  if (puzzleLayout === 'grid2h') H = 720; if (puzzleLayout === 'grid2v') H = 1440; if (puzzleLayout === 'grid3v') H = 1440;
+  const W = 1080;
+  let H = 1080;
+  if (puzzleLayout === 'grid2h') H = 720;
+  if (puzzleLayout === 'grid2v') H = 1440;
+  if (puzzleLayout === 'grid3v') H = 1440;
   canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
   function drawRoundedImage(img, x, y, w, h, r) {
     ctx.save();
-    if (r > 0) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); ctx.clip(); }
-    const ir = img.width / img.height; const cr = w / h; let dw, dh;
+    if (r > 0) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath(); ctx.clip();
+    }
+    const ir = img.width / img.height, cr = w / h;
+    let dw, dh;
     if (ir > cr) { dh = h; dw = dh * ir; } else { dw = w; dh = dw / ir; }
-    ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh); ctx.restore();
+    ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+    ctx.restore();
   }
-  const innerW = W - gap * 2; const innerH = H - gap * 2;
-  if (puzzleLayout === 'grid2h') { const cw = (innerW - gap) / 2; drawRoundedImage(puzzleImages[0].img, gap, gap, cw, innerH, radius); if (puzzleImages[1]) drawRoundedImage(puzzleImages[1].img, gap + cw + gap, gap, cw, innerH, radius); }
-  else if (puzzleLayout === 'grid2v') { const ch = (innerH - gap) / 2; drawRoundedImage(puzzleImages[0].img, gap, gap, innerW, ch, radius); if (puzzleImages[1]) drawRoundedImage(puzzleImages[1].img, gap, gap + ch + gap, innerW, ch, radius); }
-  else if (puzzleLayout === 'grid3v') { const ch = (innerH - gap * 2) / 3; for (let i = 0; i < 3; i++) if (puzzleImages[i]) drawRoundedImage(puzzleImages[i].img, gap, gap + i * (ch + gap), innerW, ch, radius); }
-  else if (puzzleLayout === 'grid4') { const cw = (innerW - gap) / 2; const ch = (innerH - gap) / 2; const positions = [[gap, gap], [gap + cw + gap, gap], [gap, gap + ch + gap], [gap + cw + gap, gap + ch + gap]]; for (let i = 0; i < 4; i++) if (puzzleImages[i]) drawRoundedImage(puzzleImages[i].img, positions[i][0], positions[i][1], cw, ch, radius); }
-  else if (puzzleLayout === 'grid9') { const cw = (innerW - gap * 2) / 3; const ch = (innerH - gap * 2) / 3; for (let i = 0; i < 9; i++) if (puzzleImages[i]) { const r = Math.floor(i / 3), c = i % 3; drawRoundedImage(puzzleImages[i].img, gap + c * (cw + gap), gap + r * (ch + gap), cw, ch, radius); } }
-  else if (puzzleLayout === 'polaroid') { const outer = 40; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); const cw = W - outer * 2; const ch = H - outer * 2 - 120; drawRoundedImage(puzzleImages[0].img, outer, outer, cw, ch, 0); ctx.fillStyle = '#fff'; ctx.fillRect(outer, outer + ch, cw, 120); }
+  const innerW = W - gap * 2, innerH = H - gap * 2;
+  if (puzzleLayout === 'grid2h') {
+    const cw = (innerW - gap) / 2;
+    drawRoundedImage(puzzleImages[0].img, gap, gap, cw, innerH, radius);
+    if (puzzleImages[1]) drawRoundedImage(puzzleImages[1].img, gap + cw + gap, gap, cw, innerH, radius);
+  } else if (puzzleLayout === 'grid2v') {
+    const ch = (innerH - gap) / 2;
+    drawRoundedImage(puzzleImages[0].img, gap, gap, innerW, ch, radius);
+    if (puzzleImages[1]) drawRoundedImage(puzzleImages[1].img, gap, gap + ch + gap, innerW, ch, radius);
+  } else if (puzzleLayout === 'grid3v') {
+    const ch = (innerH - gap * 2) / 3;
+    for (let i = 0; i < 3; i++) if (puzzleImages[i]) drawRoundedImage(puzzleImages[i].img, gap, gap + i * (ch + gap), innerW, ch, radius);
+  } else if (puzzleLayout === 'grid4') {
+    const cw = (innerW - gap) / 2, ch = (innerH - gap) / 2;
+    const positions = [[gap, gap], [gap + cw + gap, gap], [gap, gap + ch + gap], [gap + cw + gap, gap + ch + gap]];
+    for (let i = 0; i < 4; i++) if (puzzleImages[i]) drawRoundedImage(puzzleImages[i].img, positions[i][0], positions[i][1], cw, ch, radius);
+  } else if (puzzleLayout === 'grid9') {
+    const cw = (innerW - gap * 2) / 3, ch = (innerH - gap * 2) / 3;
+    for (let i = 0; i < 9; i++) if (puzzleImages[i]) {
+      const r = Math.floor(i / 3), c = i % 3;
+      drawRoundedImage(puzzleImages[i].img, gap + c * (cw + gap), gap + r * (ch + gap), cw, ch, radius);
+    }
+  } else if (puzzleLayout === 'polaroid') {
+    const outer = 40;
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+    const cw = W - outer * 2, ch = H - outer * 2 - 120;
+    drawRoundedImage(puzzleImages[0].img, outer, outer, cw, ch, 0);
+    ctx.fillStyle = '#fff'; ctx.fillRect(outer, outer + ch, cw, 120);
+  }
 }
 async function savePuzzleImage() {
   if (puzzleImages.length === 0) { showToast('请先添加图片', 'warning'); return; }
@@ -1448,14 +2291,22 @@ async function savePuzzleImage() {
     loadGallery();
   } catch (e) { showToast('保存失败：' + e.message, 'error', 3000); }
 }
+
+/* ============ 初始化 ============ */
 window.addEventListener('online', () => showToast('网络已恢复', 'success', 1500));
 window.addEventListener('offline', () => showToast('⚠️ 网络已断开', 'warning', 2000));
 function init() {
   updateTokenStatus();
   const params = new URLSearchParams(location.search);
   const urlToken = params.get('token');
-  if (urlToken) { token = urlToken; localStorage.setItem('gh_token', token); updateTokenStatus(); showToast('Token 已从 URL 获取', 'success'); }
-  if (token) loadGallery(); else renderGallery();
+  if (urlToken) {
+    token = urlToken;
+    localStorage.setItem('gh_token', token);
+    updateTokenStatus();
+    showToast('Token 已从 URL 获取', 'success');
+  }
+  if (token) loadGallery();
+  else renderGallery();
 }
 init();
 </script>
